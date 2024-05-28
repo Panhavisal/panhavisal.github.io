@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Matrix Animation</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron&display=swap');
+
+    body {
+      background-color: black;
+      color: #00ff00;
+      font-family: 'Orbitron', monospace;
+      overflow: hidden;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    #message {
+      font-size: calc(3vw + 3vh + 1vmin);
+      text-align: center;
+      z-index: 1;
+      animation: colorChange 10s infinite, glitch 2s infinite;
+    }
+
+    .rain-down {
+      position: absolute;
+      top: -50%;
+      left: 0;
+      width: 100%;
+      height: 50%;
+      font-size: 14px;
+      line-height: 14px;
+      pointer-events: none;
+      animation: rain-down 10s linear infinite;
+      color: #00ffaa;
+    }
+
+    .rain-up {
+      position: absolute;
+      bottom: -50%;
+      left: 0;
+      width: 100%;
+      height: 50%;
+      font-size: 14px;
+      line-height: 14px;
+      pointer-events: none;
+      animation: rain-up 10s linear infinite;
+      color: #00ffaa;
+    }
+
+    .rain-top {
+      position: absolute;
+      top: -50%;
+      left: 0;
+      width: 100%;
+      height: 50%;
+      font-size: 14px;
+      line-height: 14px;
+      pointer-events: none;
+      animation: rain-top 10s linear infinite;
+      color: #00ffaa;
+    }
+
+    @keyframes rain-down {
+      0% {
+        transform: translateY(-100%);
+      }
+      100% {
+        transform: translateY(100%);
+      }
+    }
+
+    @keyframes rain-up {
+      0% {
+        transform: translateY(100%);
+      }
+      100% {
+        transform: translateY(-100%);
+      }
+    }
+
+    @keyframes rain-top {
+      0% {
+        transform: translateY(-100%);
+      }
+      100% {
+        transform: translateY(100%);
+      }
+    }
+
+    @keyframes colorChange {
+      0% { color: #00ff00; }
+      25% { color: #00ff00; }
+      50% { color: #00ff00; }
+      75% { color: #00ff00; }
+      100% { color: #00ff00; }
+    }
+
+    @keyframes glitch {
+      0%, 100% {
+        text-shadow: none;
+      }
+      20% {
+        text-shadow: -0.05em 0 0 rgba(0, 255, 0, 0.75), 0.05em 0 0 rgba(0, 255, 0, 0.75);
+      }
+      40% {
+        text-shadow: 0 0.05em 0 rgba(0, 255, 0, 0.75), 0 -0.05em 0 rgba(0, 255, 0, 0.75);
+      }
+      60% {
+        text-shadow: 0.05em 0.05em 0 rgba(0, 255, 0, 0.75), -0.05em -0.05em 0 rgba(0, 255, 0, 0.75);
+      }
+      80% {
+        text-shadow: -0.05em -0.05em 0 rgba(0, 255, 0, 0.75), 0.05em 0.05em 0 rgba(0, 255, 0, 0.75);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="message">Happy Birthday Mr. Vireakbot!</div>
+  <div id="matrix-down"></div>
+  <div id="matrix-up"></div>
+  <div id="matrix-top"></div>
+  <script>
+    const matrixDownDiv = document.getElementById('matrix-down');
+    const matrixUpDiv = document.getElementById('matrix-up');
+    const matrixTopDiv = document.getElementById('matrix-top');
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+
+    function createRainDown() {
+      const rainDiv = document.createElement('div');
+      rainDiv.classList.add('rain-down');
+      rainDiv.textContent = Array.from({ length: Math.floor(Math.random() * (window.innerHeight / 14)) + 5 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+      rainDiv.style.left = `${Math.floor(Math.random() * 100)}%`;
+      rainDiv.style.animationDelay = `${Math.random() * 5}s`;
+      matrixDownDiv.appendChild(rainDiv);
+      setTimeout(() => {
+        rainDiv.remove();
+      }, 10000);
+    }
+
+    function createRainUp() {
+      const rainDiv = document.createElement('div');
+      rainDiv.classList.add('rain-up');
+      rainDiv.textContent = Array.from({ length: Math.floor(Math.random() * (window.innerHeight / 14)) + 5 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+      rainDiv.style.left = `${Math.floor(Math.random() * 100)}%`;
+      rainDiv.style.animationDelay = `${Math.random() * 5}s`;
+      matrixUpDiv.appendChild(rainDiv);
+      setTimeout(() => {
+        rainDiv.remove();
+      }, 10000);
+    }
+
+    function createRainTop() {
+      const rainDiv = document.createElement('div');
+      rainDiv.classList.add('rain-top');
+      rainDiv.textContent = Array.from({ length: Math.floor(Math.random() * (window.innerHeight / 14)) + 5 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+      rainDiv.style.left = `${Math.floor(Math.random() * 100)}%`;
+      rainDiv.style.animationDelay = `${Math.random() * 5}s`;
+      matrixTopDiv.appendChild(rainDiv);
+      setTimeout(() => {
+        rainDiv.remove();
+      }, 10000);
+    }
+
+    setInterval(createRainDown, 50);
+    setInterval(createRainUp, 50);
+    setInterval(createRainTop, 50);
+  </script>
+</body>
+</html>
