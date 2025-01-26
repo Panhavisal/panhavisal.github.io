@@ -1,174 +1,333 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Matrix Animation</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Orbitron&display=swap');
+    <meta charset="UTF-8">
+    <title>Happy Valentine's Day, Alice!</title>
+    <style>
+        /* Reset default margins and paddings */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    body {
-      background-color: black;
-      color: #00ff00;
-      font-family: 'Orbitron', monospace;
-      overflow: hidden;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
+        body {
+            background: linear-gradient(to bottom, #87ceeb, #f0e68c); /* Sky-like background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: 'Georgia', serif;
+            overflow: hidden; /* Hide overflow for floating hearts */
+            position: relative;
+        }
 
-    #message {
-      font-size: calc(3vw + 3vh + 1vmin);
-      text-align: center;
-      z-index: 1;
-      animation: colorChange 10s infinite, glitch 2s infinite;
-    }
+         /* Play Sound Button Styling */
+         #play {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            padding: 10px 20px;
+            background-color: #FF1493;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 2;
+            font-size: 16px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            transition: background-color 0.3s ease;
+        }
 
-    .rain-down {
-      position: absolute;
-      top: -50%;
-      left: 0;
-      width: 100%;
-      height: 50%;
-      font-size: 14px;
-      line-height: 14px;
-      pointer-events: none;
-      animation: rain-down 10s linear infinite;
-      color: #00ffaa;
-    }
+        #play:hover {
+            background-color: #e91e63;
+        }
 
-    .rain-up {
-      position: absolute;
-      bottom: -50%;
-      left: 0;
-      width: 100%;
-      height: 50%;
-      font-size: 14px;
-      line-height: 14px;
-      pointer-events: none;
-      animation: rain-up 10s linear infinite;
-      color: #00ffaa;
-    }
+        .container {
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
 
-    .rain-top {
-      position: absolute;
-      top: -50%;
-      left: 0;
-      width: 100%;
-      height: 50%;
-      font-size: 14px;
-      line-height: 14px;
-      pointer-events: none;
-      animation: rain-top 10s linear infinite;
-      color: #00ffaa;
-    }
+        /* Rose Grow Animation Wrapper */
+        .grow {
+            transform: scale(0);
+            animation: grow 1.5s ease-out forwards;
+        }
 
-    @keyframes rain-down {
-      0% {
-        transform: translateY(-100%);
-      }
-      100% {
-        transform: translateY(100%);
-      }
-    }
+        /* Rose Styling and Sway Animation */
+        .rose {
+            width: 200px;
+            height: 300px;
+            transform-origin: bottom center;
+            animation: sway 4s ease-in-out infinite;
+            filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.3)); /* Optional shadow for depth */
+        }
 
-    @keyframes rain-up {
-      0% {
-        transform: translateY(100%);
-      }
-      100% {
-        transform: translateY(-100%);
-      }
-    }
+        /* Grow Keyframes */
+        @keyframes grow {
+            from {
+                transform: scale(0);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
 
-    @keyframes rain-top {
-      0% {
-        transform: translateY(-100%);
-      }
-      100% {
-        transform: translateY(100%);
-      }
-    }
+        /* Sway Keyframes */
+        @keyframes sway {
+            0% { transform: rotate(0deg); }
+            20% { transform: rotate(3deg); }
+            40% { transform: rotate(-3deg); }
+            60% { transform: rotate(2deg); }
+            80% { transform: rotate(-2deg); }
+            100% { transform: rotate(0deg); }
+        }
 
-    @keyframes colorChange {
-      0% { color: #00ff00; }
-      25% { color: #00ff00; }
-      50% { color: #00ff00; }
-      75% { color: #00ff00; }
-      100% { color: #00ff00; }
-    }
+        /* Valentine's Message Styling */
+        .message {
+            margin-top: 20px;
+            color: #333;
+            font-size: 24px;
+            position: relative;
+            height: 150px; /* Increased height to accommodate all messages */
+            overflow: hidden;
+        }
 
-    @keyframes glitch {
-      0%, 100% {
-        text-shadow: none;
-      }
-      20% {
-        text-shadow: -0.05em 0 0 rgba(0, 255, 0, 0.75), 0.05em 0 0 rgba(0, 255, 0, 0.75);
-      }
-      40% {
-        text-shadow: 0 0.05em 0 rgba(0, 255, 0, 0.75), 0 -0.05em 0 rgba(0, 255, 0, 0.75);
-      }
-      60% {
-        text-shadow: 0.05em 0.05em 0 rgba(0, 255, 0, 0.75), -0.05em -0.05em 0 rgba(0, 255, 0, 0.75);
-      }
-      80% {
-        text-shadow: -0.05em -0.05em 0 rgba(0, 255, 0, 0.75), 0.05em 0.05em 0 rgba(0, 255, 0, 0.75);
-      }
-    }
-  </style>
+        /* Initial State for Messages */
+        .message span {
+            position: absolute;
+            width: 100%;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            animation-duration: 24s;
+            animation-timing-function: ease-in-out;
+            animation-iteration-count: infinite;
+        }
+
+        /* Individual Messages */
+        /**
+        .message1 {
+            opacity: 1;
+            animation-name: fadeInOut;
+            animation-delay: 0s;
+        }
+
+        .message2 {
+            opacity: 1;
+            animation-name: fadeInOut;
+            animation-delay: 4s;
+        }
+
+        .message3 {
+            opacity: 1;
+            animation-name: fadeInOut;
+            animation-delay: 8s;
+        }
+
+        .message4 {
+            opacity: 1;
+            animation-name: fadeInOut;
+            animation-delay: 13s;
+        }**/
+
+                /* Initial State for Messages */
+                .message span {
+                    position: absolute;
+                    width: 100%;
+                    left: 0;
+                    top: 0;
+                    opacity: 0;
+                    animation-duration: 18s;
+                    animation-timing-function: ease-in-out;
+                    animation-iteration-count: infinite;
+                }
+        
+                /* Individual Messages */
+                .message1 {
+                    opacity: 1;
+                    animation-name: fadeInOut;
+                    animation-delay: 0s;
+                }
+        
+                .message2 {
+                    opacity: 0;
+                    animation-name: fadeInOut;
+                    animation-delay: 6s;
+                }
+        
+                .message3 {
+                    opacity: 0;
+                    animation-name: fadeInOut;
+                    animation-delay: 12s;
+                }
+
+
+        /* Keyframes for Fading In and Out */
+        @keyframes fadeInOut {
+            0% { opacity: 0; }
+            10% { opacity: 1; }
+            30% { opacity: 1; }
+            40% { opacity: 0; }
+            100% { opacity: 0; }
+        }
+
+        /* Background Mini Hearts */
+        .heart {
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            background: red;
+            transform: rotate(-45deg);
+            animation: float 4s linear infinite;
+            opacity: 0.8;
+            pointer-events: none; /* Allow clicks through hearts */
+        }
+
+        .heart::before,
+        .heart::after {
+            content: "";
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            background: red;
+            border-radius: 50%;
+        }
+
+        .heart::before {
+            top: -7.5px;
+        }
+
+        .heart::after {
+            left: 7.5px;
+        }
+
+        /* Floating Hearts Animation */
+        @keyframes float {
+            0% {
+                transform: translateY(0) rotate(-45deg);
+                opacity: 0.8;
+            }
+            100% {
+                transform: translateY(-100vh) rotate(-45deg);
+                opacity: 0;
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 600px) {
+            .rose {
+                width: 150px;
+                height: 225px;
+            }
+
+            .message {
+                font-size: 20px;
+                height: 180px; /* Adjust based on new message length */
+            }
+
+            .heart {
+                width: 10px;
+                height: 10px;
+            }
+
+            .heart::before,
+            .heart::after {
+                width: 10px;
+                height: 10px;
+            }
+        }
+    </style>
 </head>
 <body>
-  <div id="message">Happy Birthday Mr. Vireakbot!</div>
-  <div id="matrix-down"></div>
-  <div id="matrix-up"></div>
-  <div id="matrix-top"></div>
-  <script>
-    const matrixDownDiv = document.getElementById('matrix-down');
-    const matrixUpDiv = document.getElementById('matrix-up');
-    const matrixTopDiv = document.getElementById('matrix-top');
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    <button id="play">Play Sound</button>
+    <audio id="audio">
+        <source src="song/love.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
 
-    function createRainDown() {
-      const rainDiv = document.createElement('div');
-      rainDiv.classList.add('rain-down');
-      rainDiv.textContent = Array.from({ length: Math.floor(Math.random() * (window.innerHeight / 14)) + 5 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
-      rainDiv.style.left = `${Math.floor(Math.random() * 100)}%`;
-      rainDiv.style.animationDelay = `${Math.random() * 5}s`;
-      matrixDownDiv.appendChild(rainDiv);
-      setTimeout(() => {
-        rainDiv.remove();
-      }, 10000);
-    }
+    <script>
+        document.getElementById('play').addEventListener('click', () => {
+            const audio = document.getElementById('audio');
+            audio.play().catch(error => console.error('Error playing audio:', error));
+        });
+    </script>
+    <!-- Hidden YouTube Embed for Background Music -->
+    <iframe id="background-music-iframe" width="0" height="0" src="https://www.youtube.com/embed/Ptk_1Dc2iPY?autoplay=1&loop=1&playlist=Ptk_1Dc2iPY&controls=0&mute=0" 
+        frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
 
-    function createRainUp() {
-      const rainDiv = document.createElement('div');
-      rainDiv.classList.add('rain-up');
-      rainDiv.textContent = Array.from({ length: Math.floor(Math.random() * (window.innerHeight / 14)) + 5 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
-      rainDiv.style.left = `${Math.floor(Math.random() * 100)}%`;
-      rainDiv.style.animationDelay = `${Math.random() * 5}s`;
-      matrixUpDiv.appendChild(rainDiv);
-      setTimeout(() => {
-        rainDiv.remove();
-      }, 10000);
-    }
+    <div class="container">
+        <!-- Rose with Grow Animation -->
+        <div class="grow">
+            <svg class="rose" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+                <!-- Stem -->
+                <path d="M32 64 C32 64, 32 40, 32 20" stroke="#228B22" stroke-width="2" fill="none"/>
+                <!-- Leaves -->
+                <path d="M32 30 Q28 35, 32 40" stroke="#228B22" stroke-width="2" fill="none"/>
+                <path d="M32 30 Q36 35, 32 40" stroke="#228B22" stroke-width="2" fill="none"/>
+                <!-- Petals -->
+                <circle cx="32" cy="20" r="4" fill="#FF1493"/>
+                <circle cx="30" cy="18" r="4" fill="#FF1493"/>
+                <circle cx="34" cy="18" r="4" fill="#FF1493"/>
+                <circle cx="28" cy="20" r="4" fill="#FF1493"/>
+                <circle cx="36" cy="20" r="4" fill="#FF1493"/>
+                <circle cx="30" cy="22" r="4" fill="#FF1493"/>
+                <circle cx="34" cy="22" r="4" fill="#FF1493"/>
+                <!-- Center of the Rose -->
+                <circle cx="32" cy="20" r="2" fill="#FFD700"/>
+            </svg>
+        </div>
 
-    function createRainTop() {
-      const rainDiv = document.createElement('div');
-      rainDiv.classList.add('rain-top');
-      rainDiv.textContent = Array.from({ length: Math.floor(Math.random() * (window.innerHeight / 14)) + 5 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
-      rainDiv.style.left = `${Math.floor(Math.random() * 100)}%`;
-      rainDiv.style.animationDelay = `${Math.random() * 5}s`;
-      matrixTopDiv.appendChild(rainDiv);
-      setTimeout(() => {
-        rainDiv.remove();
-      }, 10000);
-    }
+        <!-- Valentine's Message -->
+        <div class="message">
+            <span class="message1">Happy Valentine's Day, Alice!</span>
+            <span class="message2">My love for you grows deeper every day. Forever yours, Elwood.</span>
+            <span class="message3">Every moment with you is a treasure. I cherish you endlessly.</span>
+            <span class="message4">You are the light of my life and my eternal love.</span>
+            <span class="message5"></span>
+        </div>
+    </div>
 
-    setInterval(createRainDown, 50);
-    setInterval(createRainUp, 50);
-    setInterval(createRainTop, 50);
-  </script>
+    <!-- JavaScript for Mini Hearts and Music Handling -->
+    <script>
+        // Function to create a mini heart
+        function createMiniHeart() {
+            const heart = document.createElement('div');
+            heart.classList.add('heart');
+
+            // Random position
+            heart.style.left = Math.random() * 100 + 'vw';
+            heart.style.bottom = Math.random() * 100 + 'vh';
+
+            // Random animation duration between 3s to 6s
+            heart.style.animationDuration = (Math.random() * 3 + 3) + 's';
+
+            // Random animation delay
+            heart.style.animationDelay = '-' + Math.random() * 6 + 's';
+
+            document.body.appendChild(heart);
+
+            // Remove heart after animation ends to prevent DOM clutter
+            heart.addEventListener('animationend', () => {
+                heart.remove();
+            });
+        }
+
+        // Create mini hearts at intervals
+        setInterval(createMiniHeart, 500); // Adjust interval as needed
+
+        // Background Music Handling
+        const musicIframe = document.getElementById('background-music-iframe');
+
+        // Attempt to play music on page load
+        window.addEventListener('load', () => {
+            // Due to browser restrictions, autoplay with sound might be blocked.
+            // This iframe attempts to autoplay the music.
+            // If blocked, users may need to interact with the page to enable sound.
+        });
+    </script>
 </body>
 </html>
