@@ -24,93 +24,77 @@
             text-align: center;
         }
 
-        #play {
-            position: absolute;
-            bottom: 20px;
-            left: 20px;
-            padding: 12px 24px;
-            background: linear-gradient(45deg, #ff4e50, #ff7e5f);
-            color: white;
-            border: none;
-            border-radius: 50px;
-            cursor: pointer;
-            z-index: 2;
-            font-size: 18px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-            transition: all 0.3s ease;
-        }
-
-        #play:hover {
-            background-color: #e91e63;
-            transform: scale(1.1);
-            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.4);
-        }
-
         .container {
             text-align: center;
             position: relative;
             z-index: 1;
         }
 
-        .grow {
-            transform: scale(0);
-            animation: grow 2s ease-out forwards;
-        }
-
-        .rose {
-            width: 200px;
-            height: 300px;
-            transform-origin: bottom center;
-            animation: sway 4s ease-in-out infinite alternate;
-        }
-
-        @keyframes grow {
-            from { transform: scale(0); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
-        }
-
-        @keyframes sway {
-            0% { transform: rotate(3deg); }
-            100% { transform: rotate(-3deg); }
-        }
-
-        .message {
-            margin-top: 20px;
-            color: white;
-            font-size: clamp(24px, 4vw, 40px);
-            font-weight: bold;
-            text-shadow: 2px 2px 10px rgba(0,0,0,0.5);
+        .rose-container {
             position: relative;
+            width: 100px;
             height: 150px;
-            overflow: hidden;
         }
 
-        .message span {
+        .stem {
             position: absolute;
-            width: 100%;
-            left: 0;
-            top: 0;
-            opacity: 0;
-            animation: fadeInOut 18s ease-in-out infinite;
+            bottom: 0;
+            left: 50%;
+            width: 6px;
+            height: 100px;
+            background: green;
+            transform: translateX(-50%);
+            border-radius: 3px;
         }
 
-        .message1 { animation-delay: 0s; }
-        .message2 { animation-delay: 6s; }
-        .message3 { animation-delay: 12s; }
+        .leaf {
+            position: absolute;
+            width: 20px;
+            height: 10px;
+            background: green;
+            border-radius: 10px;
+        }
 
-        @keyframes fadeInOut {
-            0%, 100% { opacity: 0; }
-            10%, 30% { opacity: 1; }
-            40% { opacity: 0; }
+        .leaf.left {
+            left: -15px;
+            top: 40px;
+            transform: rotate(-30deg);
+        }
+
+        .leaf.right {
+            right: -15px;
+            top: 60px;
+            transform: rotate(30deg);
+        }
+
+        .petal {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background: red;
+            border-radius: 50%;
+        }
+
+        .petal.center {
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .petal.left {
+            top: 10px;
+            left: 25%;
+        }
+
+        .petal.right {
+            top: 10px;
+            right: 25%;
         }
 
         .heart {
             position: absolute;
-            width: 20px;
-            height: 20px;
+            width: 30px;
+            height: 30px;
             background: red;
             transform: rotate(-45deg);
             animation: float 5s linear infinite;
@@ -122,14 +106,14 @@
         .heart::after {
             content: "";
             position: absolute;
-            width: 20px;
-            height: 20px;
+            width: 30px;
+            height: 30px;
             background: red;
             border-radius: 50%;
         }
 
-        .heart::before { top: -10px; }
-        .heart::after { left: 10px; }
+        .heart::before { top: -15px; }
+        .heart::after { left: 15px; }
 
         @keyframes float {
             0% { transform: translateY(0) rotate(-45deg); opacity: 0.8; }
@@ -138,33 +122,20 @@
     </style>
 </head>
 <body>
-    <button id="play">❤ Play Music</button>
-
     <div class="container">
-        <div class="grow">
-            <svg class="rose" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-                <path d="M32 64 C32 64, 32 40, 32 20" stroke="#228B22" stroke-width="2" fill="none"/>
-                <path d="M32 30 Q28 35, 32 40" stroke="#228B22" stroke-width="2" fill="none"/>
-                <circle cx="32" cy="20" r="4" fill="#FF1493"/>
-            </svg>
-        </div>
-
-        <div class="message">
-            <span class="message1">Happy Valentine's Day, Alice!</span>
-            <span class="message2">You are my heart and soul, forever cherished.</span>
-            <span class="message3">Every moment with you is a treasure.</span>
+        <div class="rose-container">
+            <div class="stem"></div>
+            <div class="leaf left"></div>
+            <div class="leaf right"></div>
+            <div class="petal center"></div>
+            <div class="petal left"></div>
+            <div class="petal right"></div>
         </div>
     </div>
 
     <script>
-        const playButton = document.getElementById('play');
         const MAX_HEARTS = 20;
         let heartCount = 0;
-
-        playButton.addEventListener('click', () => {
-            const audio = new Audio('/love.html');
-            audio.play().catch(error => console.error('Error playing audio:', error));
-        });
 
         function createMiniHeart() {
             if (heartCount >= MAX_HEARTS) return;
