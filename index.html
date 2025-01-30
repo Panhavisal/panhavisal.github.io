@@ -57,8 +57,8 @@
 
         /* Rose Styling and Sway Animation */
         .rose {
-            width: 300px;   /* Adjust as needed for size */
-            height: 450px;  /* Adjust as needed for size */
+            width: 300px;      /* Increased from 200 to make the rose bigger */
+            height: 450px;     /* Increased height for a taller rose */
             transform-origin: bottom center;
             animation: sway 6s ease-in-out infinite;
             filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.3)); /* Optional shadow for depth */
@@ -245,9 +245,10 @@
     <div class="container">
         <!-- Rose with Grow Animation -->
         <div class="grow">
+            <!-- Bigger & More Realistic 2D Rose -->
             <svg class="rose" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 300">
 
-                <!-- Stem -->
+                <!-- Stem & Leaves -->
                 <path 
                     d="M100,300 
                        C100,220 95,180 100,150"
@@ -256,96 +257,55 @@
                     stroke-width="4"
                     stroke-linecap="round"
                 />
-
-                <!-- Leaves (Filled) -->
-                <!-- Left Leaf -->
-                <path
-                    d="M85,190 
-                       C60,185 60,175 75,160
-                       C85,155 90,160 90,170
-                       C85,180 90,185 85,190
-                       Z"
-                    fill="#228B22"
-                    stroke="#006400"
-                    stroke-width="2"
-                />
-                <!-- Right Leaf -->
-                <path
-                    d="M110,180 
-                       C130,170 140,155 130,140
-                       C120,130 110,135 105,145
-                       C105,155 100,165 100,165
-                       Z"
-                    fill="#228B22"
-                    stroke="#006400"
-                    stroke-width="2"
-                />
-
-                <!-- Optional extra leaves or lines for detail -->
                 <path 
                     d="M95,200 Q70,190 80,160" 
                     fill="none" 
                     stroke="#228B22" 
-                    stroke-width="2"
+                    stroke-width="3"
                     stroke-linecap="round"
                 />
                 <path 
                     d="M105,180 Q130,170 120,140" 
                     fill="none" 
                     stroke="#228B22" 
-                    stroke-width="2"
+                    stroke-width="3"
                     stroke-linecap="round"
                 />
 
-                <!-- OUTER Petal Layer -->
+                <!-- Outer Petals -->
                 <path 
-                    d="M100,140
-                       C130,130 160,160 140,200
-                       C170,200 170,230 130,240
-                       C150,280 100,280 80,240
-                       C40,240 30,210 60,190
-                       C20,170 60,130 90,140
-                       C90,120 100,110 110,120
+                    d="M100,150
+                       C120,140 140,160 130,180
+                       C160,180 160,200 130,210
+                       C150,240 100,240  90,210
+                       C60,210  40,190  50,170
+                       C30,150  60,130  80,140
+                       C80,120  90,115  100,120
                        Z"
                     fill="#E91E63"
                     stroke="#AD1457"
                     stroke-width="3"
                 />
 
-                <!-- MIDDLE Petal Layer -->
+                <!-- Inner Petals Detail -->
                 <path 
                     d="M100,150
-                       C120,140 145,150 140,170
-                       C160,180 150,210 120,210
-                       C130,230 100,230 80,210
-                       C50,210 40,180 60,170
-                       C55,150 80,140 90,150
-                       C90,130 110,125 120,130
-                       Z"
-                    fill="#F06292"
-                    stroke="#AD1457"
-                    stroke-width="2"
-                />
-
-                <!-- INNER Petal Layer -->
-                <path 
-                    d="M100,160
-                       C110,155 125,160 125,175
-                       C140,185 135,195 120,195
-                       C130,210 100,210 85,195
-                       C70,195 70,185 75,175
-                       C70,160 90,155 95,160
+                       C110,140 125,140 125,155
+                       C140,160 140,170 125,175
+                       C140,190 100,190  90,175
+                       C75,170  80,160  85,155
+                       C80,150  90,140  100,150
                        Z"
                     fill="#F48FB1"
                     stroke="#AD1457"
                     stroke-width="2"
                 />
 
-                <!-- Center (Stamen) -->
+                <!-- Rose center (golden stamen) -->
                 <circle 
                     cx="100" 
-                    cy="165" 
-                    r="6" 
+                    cy="155" 
+                    r="4" 
                     fill="#FFD700"
                 />
             </svg>
@@ -367,10 +327,11 @@
         let maxHearts = 0;
 
         function updateMaxHearts() {
-          // Simple formula: 1 heart per 20,000 pixels of screen area
+          // 1 heart per 20,000 pixels of screen area (adjust as desired)
           const area = window.innerWidth * window.innerHeight;
           maxHearts = Math.floor(area / 20000);
 
+          // Ensure at least a few hearts
           if (maxHearts < 5) {
             maxHearts = 5;
           }
@@ -406,13 +367,13 @@
 
             document.body.appendChild(heart);
 
-            // Remove heart after animation
+            // Remove after animation
             heart.addEventListener('animationend', () => {
                 heart.remove();
             });
         }
 
-        // Spawn hearts at intervals, respecting maxHearts
+        // Keep spawning hearts, respecting maxHearts
         setInterval(() => {
             const heartCount = document.querySelectorAll('.heart').length;
             if (heartCount < maxHearts) {
@@ -427,13 +388,13 @@
             const sparkle = document.createElement('div');
             sparkle.classList.add('sparkle');
 
-            // Random position
+            // Random screen position
             sparkle.style.left = Math.random() * 100 + 'vw';
             sparkle.style.top = Math.random() * 100 + 'vh';
 
             document.body.appendChild(sparkle);
 
-            // Remove sparkle after animation
+            // Remove after animation
             sparkle.addEventListener('animationend', () => {
                 sparkle.remove();
             });
