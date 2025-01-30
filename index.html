@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -22,8 +23,8 @@
             position: relative;
         }
 
-         /* Play Sound Button Styling */
-         #play {
+        /* Play Sound Button Styling */
+        #play {
             position: absolute;
             bottom: 20px;
             left: 20px;
@@ -60,7 +61,7 @@
             width: 200px;
             height: 300px;
             transform-origin: bottom center;
-            animation: sway 4s ease-in-out infinite;
+            animation: sway 6s ease-in-out infinite;
             filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.3)); /* Optional shadow for depth */
         }
 
@@ -79,10 +80,9 @@
         /* Sway Keyframes */
         @keyframes sway {
             0% { transform: rotate(0deg); }
-            20% { transform: rotate(3deg); }
-            40% { transform: rotate(-3deg); }
-            60% { transform: rotate(2deg); }
-            80% { transform: rotate(-2deg); }
+            25% { transform: rotate(5deg); }
+            50% { transform: rotate(-5deg); }
+            75% { transform: rotate(3deg); }
             100% { transform: rotate(0deg); }
         }
 
@@ -103,75 +103,47 @@
             left: 0;
             top: 0;
             opacity: 0;
-            animation-duration: 24s;
+            animation-duration: 18s;
             animation-timing-function: ease-in-out;
             animation-iteration-count: infinite;
         }
 
         /* Individual Messages */
-        /**
         .message1 {
-            opacity: 1;
-            animation-name: fadeInOut;
-            animation-delay: 0s;
+            animation-name: fadeInOut1;
         }
 
         .message2 {
-            opacity: 1;
-            animation-name: fadeInOut;
-            animation-delay: 4s;
+            animation-name: fadeInOut2;
         }
 
         .message3 {
-            opacity: 1;
-            animation-name: fadeInOut;
-            animation-delay: 8s;
+            animation-name: fadeInOut3;
         }
 
-        .message4 {
-            opacity: 1;
-            animation-name: fadeInOut;
-            animation-delay: 13s;
-        }**/
-
-                /* Initial State for Messages */
-                .message span {
-                    position: absolute;
-                    width: 100%;
-                    left: 0;
-                    top: 0;
-                    opacity: 0;
-                    animation-duration: 18s;
-                    animation-timing-function: ease-in-out;
-                    animation-iteration-count: infinite;
-                }
-        
-                /* Individual Messages */
-                .message1 {
-                    opacity: 1;
-                    animation-name: fadeInOut;
-                    animation-delay: 0s;
-                }
-        
-                .message2 {
-                    opacity: 0;
-                    animation-name: fadeInOut;
-                    animation-delay: 6s;
-                }
-        
-                .message3 {
-                    opacity: 0;
-                    animation-name: fadeInOut;
-                    animation-delay: 12s;
-                }
-
-
         /* Keyframes for Fading In and Out */
-        @keyframes fadeInOut {
+        @keyframes fadeInOut1 {
             0% { opacity: 0; }
             10% { opacity: 1; }
             30% { opacity: 1; }
             40% { opacity: 0; }
+            100% { opacity: 0; }
+        }
+
+        @keyframes fadeInOut2 {
+            0% { opacity: 0; }
+            33% { opacity: 0; }
+            43% { opacity: 1; }
+            63% { opacity: 1; }
+            73% { opacity: 0; }
+            100% { opacity: 0; }
+        }
+
+        @keyframes fadeInOut3 {
+            0% { opacity: 0; }
+            66% { opacity: 0; }
+            76% { opacity: 1; }
+            96% { opacity: 1; }
             100% { opacity: 0; }
         }
 
@@ -182,7 +154,7 @@
             height: 15px;
             background: red;
             transform: rotate(-45deg);
-            animation: float 4s linear infinite;
+            animation: float 6s linear infinite; /* Slower animation */
             opacity: 0.8;
             pointer-events: none; /* Allow clicks through hearts */
         }
@@ -217,6 +189,23 @@
             }
         }
 
+        /* Sparkles Animation */
+        .sparkle {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: gold;
+            border-radius: 50%;
+            animation: sparkle 1.5s infinite;
+            pointer-events: none;
+        }
+
+        @keyframes sparkle {
+            0% { opacity: 0; transform: scale(0); }
+            50% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0; transform: scale(0); }
+        }
+
         /* Responsive Design */
         @media (max-width: 600px) {
             .rose {
@@ -246,6 +235,7 @@
     <button id="play">Play Sound</button>
     <audio id="audio">
         <source src="/love.html" type="audio/mpeg">
+        <!--<source src="/song/love.mp3" type="audio/mpeg"> -->
         Your browser does not support the audio element.
     </audio>
 
@@ -286,8 +276,6 @@
             <span class="message1">Happy Valentine's Day, Alice!</span>
             <span class="message2">My love for you grows deeper every day. Forever yours, Elwood.</span>
             <span class="message3">Every moment with you is a treasure. I cherish you endlessly.</span>
-            <span class="message4">You are the light of my life and my eternal love.</span>
-            <span class="message5"></span>
         </div>
     </div>
 
@@ -302,11 +290,21 @@
             heart.style.left = Math.random() * 100 + 'vw';
             heart.style.bottom = Math.random() * 100 + 'vh';
 
-            // Random animation duration between 3s to 6s
-            heart.style.animationDuration = (Math.random() * 3 + 3) + 's';
+            // Random animation duration between 4s to 8s
+            heart.style.animationDuration = (Math.random() * 4 + 4) + 's';
 
             // Random animation delay
             heart.style.animationDelay = '-' + Math.random() * 6 + 's';
+
+            // Random size (10px to 20px)
+            const size = Math.random() * 10 + 10;
+            heart.style.width = size + 'px';
+            heart.style.height = size + 'px';
+
+            // Random color variation
+            const color = `rgba(255, ${Math.random() * 100}, ${Math.random() * 100}, 0.8)`;
+            heart.style.background = color;
+            heart.style.borderColor = color;
 
             document.body.appendChild(heart);
 
@@ -316,8 +314,28 @@
             });
         }
 
-        // Create mini hearts at intervals
-        setInterval(createMiniHeart, 500); // Adjust interval as needed
+        // Function to create a sparkle
+        function createSparkle() {
+            const sparkle = document.createElement('div');
+            sparkle.classList.add('sparkle');
+
+            // Random position around the rose
+            sparkle.style.left = Math.random() * 100 + 'vw';
+            sparkle.style.top = Math.random() * 100 + 'vh';
+
+            document.body.appendChild(sparkle);
+
+            // Remove sparkle after animation ends
+            sparkle.addEventListener('animationend', () => {
+                sparkle.remove();
+            });
+        }
+
+        // Create mini hearts at intervals (1.5 seconds)
+        setInterval(createMiniHeart, 1500);
+
+        // Create sparkles at intervals (1 second)
+        setInterval(createSparkle, 1000);
 
         // Background Music Handling
         const musicIframe = document.getElementById('background-music-iframe');
