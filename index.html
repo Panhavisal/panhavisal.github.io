@@ -950,6 +950,99 @@ function drawDiscordScene(time, sceneT, alpha) {
 // ================================================================
 // SCENE 2: MOON GAZING
 // ================================================================
+
+// Boy pointing at the moon (right arm raised)
+function drawBoyPointing(x, y, scale, time) {
+    const bob = Math.sin(time * 0.003) * scale * 0.7;
+    const armWave = Math.sin(time * 0.002) * 0.8;
+
+    const parts = [
+        // Hair
+        [-4,-24,8,2,'#3a2a1a'], [-5,-22,10,2,'#3a2a1a'],
+        [-5,-20,1,3,'#3a2a1a'], [4,-20,1,3,'#3a2a1a'],
+        // Face
+        [-4,-20,8,5,'#fdd9b5'],
+        // Eyes (looking right/up toward moon)
+        [-2,-18,2,1,'#2c3e50'], [2,-18,2,1,'#2c3e50'],
+        // Smile
+        [-1,-16,3,1,'#e74c3c'],
+        // Shirt
+        [-4,-15,8,2,'#3498db'], [-5,-13,10,5,'#3498db'],
+        // Left arm (relaxed at side)
+        [-7,-13,2,4,'#fdd9b5'],
+        // Pants
+        [-4,-8,8,4,'#2c3e50'],
+        // Legs
+        [-4,-4,3,4,'#2c3e50'], [1,-4,3,4,'#2c3e50'],
+        // Shoes
+        [-5,0,4,2,'#8b4513'], [1,0,4,2,'#8b4513'],
+    ];
+
+    ctx.save();
+    ctx.translate(x, y + bob);
+    for (const [px, py, pw, ph, color] of parts) {
+        ctx.fillStyle = color;
+        ctx.fillRect(px * scale, py * scale, pw * scale, ph * scale);
+    }
+
+    // Right arm pointing up-right toward moon (with gentle wave)
+    ctx.fillStyle = '#fdd9b5';
+    ctx.fillRect(5 * scale, (-14 + armWave) * scale, 2 * scale, 2 * scale);
+    ctx.fillRect(7 * scale, (-16 + armWave) * scale, 2 * scale, 2 * scale);
+    ctx.fillRect(9 * scale, (-18 + armWave) * scale, 2 * scale, 1.5 * scale);
+    ctx.fillRect(10 * scale, (-19 + armWave) * scale, 2 * scale, 1 * scale);
+
+    ctx.restore();
+}
+
+// Girl looking up at moon happily (hands clasped near chest)
+function drawGirlHappy(x, y, scale, time) {
+    const bob = Math.sin(time * 0.003 + 1) * scale * 0.8;
+    const sway = Math.sin(time * 0.0015) * scale * 0.5;
+
+    const parts = [
+        // Hair
+        [-4,-24,8,2,'#5a2d0c'], [-5,-22,10,3,'#5a2d0c'],
+        [-6,-19,2,8,'#5a2d0c'], [4,-19,2,8,'#5a2d0c'],
+        // Face
+        [-4,-19,8,5,'#fdd9b5'],
+        // Eyes (looking up toward moon)
+        [-2,-17,2,1,'#2c3e50'], [2,-17,2,1,'#2c3e50'],
+        // Blush (happy!)
+        [-4,-16,2,1,'#ffb6c1'], [2,-16,2,1,'#ffb6c1'],
+        // Bigger smile
+        [-2,-15,4,1,'#e74c3c'],
+        // Shirt
+        [-4,-14,8,2,'#ff6b9d'], [-5,-12,10,5,'#ff6b9d'],
+        // Dress
+        [-6,-7,12,5,'#ff3d7f'], [-5,-2,10,2,'#ff3d7f'],
+        // Legs
+        [-3,0,2,3,'#fdd9b5'], [1,0,2,3,'#fdd9b5'],
+        // Shoes
+        [-4,3,3,2,'#ff1493'], [1,3,3,2,'#ff1493'],
+    ];
+
+    ctx.save();
+    ctx.translate(x + sway, y + bob);
+    for (const [px, py, pw, ph, color] of parts) {
+        ctx.fillStyle = color;
+        ctx.fillRect(px * scale, py * scale, pw * scale, ph * scale);
+    }
+
+    // Arms clasped near chest (awed/happy gesture)
+    ctx.fillStyle = '#fdd9b5';
+    // Left arm bent inward
+    ctx.fillRect(-7 * scale, -12 * scale, 2 * scale, 2 * scale);
+    ctx.fillRect(-5 * scale, -11 * scale, 2 * scale, 2 * scale);
+    // Right arm bent inward
+    ctx.fillRect(5 * scale, -12 * scale, 2 * scale, 2 * scale);
+    ctx.fillRect(3 * scale, -11 * scale, 2 * scale, 2 * scale);
+    // Hands clasped at center chest
+    ctx.fillRect(-1 * scale, -10 * scale, 2 * scale, 2 * scale);
+
+    ctx.restore();
+}
+
 function drawMoonScene(time, sceneT, alpha) {
     ctx.globalAlpha = alpha;
     drawNightSky();
@@ -961,11 +1054,37 @@ function drawMoonScene(time, sceneT, alpha) {
     drawFullMoon(W * 0.65, H * 0.22, time);
     drawGrass(groundY);
 
+    // Characters fade in
     const appear = easeInOut(Math.min(1, sceneT / 2500));
     ctx.globalAlpha = alpha * appear;
 
-    drawCharacter('boy', W * 0.35, groundY, s, 0, false);
-    drawCharacter('girl', W * 0.45, groundY, s, 0, false);
+    // Boy pointing at the moon, girl looking up happily
+    drawBoyPointing(W * 0.35, groundY, s, time);
+    drawGirlHappy(W * 0.45, groundY, s, time);
+
+    // Small heart floating between them
+    if (sceneT > 3000) {
+        const heartAlpha = easeInOut(progress(3000, 5000, sceneT));
+        const heartFloat = Math.sin(time * 0.003) * s * 2;
+        const heartBeat = 1 + Math.sin(time * 0.006) * 0.15;
+        const hx = W * 0.4;
+        const hy = groundY - 30 * s + heartFloat;
+        const hs = s * 0.45 * heartBeat;
+
+        ctx.globalAlpha = alpha * appear * heartAlpha * 0.8;
+        ctx.fillStyle = '#ff3d7f';
+        for (let r = 0; r < MINI_HEART.length; r++) {
+            for (let c = 0; c < MINI_HEART[r].length; c++) {
+                if (MINI_HEART[r][c]) {
+                    ctx.fillRect(
+                        Math.round(hx + (c - 3) * hs),
+                        Math.round(hy + r * hs),
+                        Math.ceil(hs), Math.ceil(hs)
+                    );
+                }
+            }
+        }
+    }
 
     ctx.globalAlpha = 1;
 }
