@@ -883,25 +883,32 @@ function drawDiscordScene(time, sceneT, alpha) {
 
     const s = Math.max(1.5, Math.min(3.5, Math.min(W, H) / 300));
     const deskY = H * 0.68;
-    const monTop = deskY - 23.5 * s; // top of monitor
-    const cs = s * 0.7; // character scale (smaller to fit above monitor)
+    const groundY = deskY + 3 * s; // floor level for standing characters
+    const charS = getCharScale() * 0.75; // slightly smaller to fit scene
 
     // Desk surface
     ctx.fillStyle = '#3a3045';
     ctx.fillRect(0, deskY, W, 3 * s);
     ctx.fillStyle = '#2a2235';
-    ctx.fillRect(0, deskY + 3 * s, W, H - deskY - 3 * s);
+    ctx.fillRect(0, groundY, W, H - groundY);
+
+    // Monitor positions: offset to leave room for characters beside them
+    const girlMonX = W * 0.25;
+    const boyMonX = W * 0.75;
+    // Characters stand beside their monitors (girl to left of her monitor, boy to right of his)
+    const girlCharX = girlMonX - 18 * s;
+    const boyCharX = boyMonX + 18 * s;
 
     // Monitor glow on desk
     const leftApp = easeInOut(Math.min(1, sceneT / 1500));
     if (leftApp > 0) {
         ctx.save();
         ctx.globalAlpha = alpha * leftApp * 0.08;
-        const grd1 = ctx.createRadialGradient(W * 0.3, deskY - 5 * s, 0, W * 0.3, deskY - 5 * s, 18 * s);
+        const grd1 = ctx.createRadialGradient(girlMonX, deskY - 5 * s, 0, girlMonX, deskY - 5 * s, 18 * s);
         grd1.addColorStop(0, '#5865F2');
         grd1.addColorStop(1, 'rgba(88,101,242,0)');
         ctx.fillStyle = grd1;
-        ctx.fillRect(W * 0.3 - 20 * s, deskY - 20 * s, 40 * s, 25 * s);
+        ctx.fillRect(girlMonX - 20 * s, deskY - 20 * s, 40 * s, 25 * s);
         ctx.restore();
     }
 
@@ -909,43 +916,45 @@ function drawDiscordScene(time, sceneT, alpha) {
     if (rightApp > 0) {
         ctx.save();
         ctx.globalAlpha = alpha * rightApp * 0.08;
-        const grd2 = ctx.createRadialGradient(W * 0.7, deskY - 5 * s, 0, W * 0.7, deskY - 5 * s, 18 * s);
+        const grd2 = ctx.createRadialGradient(boyMonX, deskY - 5 * s, 0, boyMonX, deskY - 5 * s, 18 * s);
         grd2.addColorStop(0, '#EB459E');
         grd2.addColorStop(1, 'rgba(235,69,158,0)');
         ctx.fillStyle = grd2;
-        ctx.fillRect(W * 0.7 - 20 * s, deskY - 20 * s, 40 * s, 25 * s);
+        ctx.fillRect(boyMonX - 20 * s, deskY - 20 * s, 40 * s, 25 * s);
         ctx.restore();
     }
 
-    // Girl dancing at left desk (drawn BEFORE monitor so body is behind it)
+    // Girl's monitor (left)
     if (leftApp > 0) {
         ctx.save();
         ctx.globalAlpha = alpha * leftApp;
-        drawDancingPerson(W * 0.3, monTop + 6 * cs, cs, 'girl', time);
+        drawPixelMonitor(girlMonX, deskY, s, 'girl');
         ctx.restore();
     }
 
-    // Boy dancing at right desk (drawn BEFORE monitor)
+    // Boy's monitor (right)
     if (rightApp > 0) {
         ctx.save();
         ctx.globalAlpha = alpha * rightApp;
-        drawDancingPerson(W * 0.7, monTop + 6 * cs, cs, 'boy', time);
+        drawPixelMonitor(boyMonX, deskY, s, 'boy');
         ctx.restore();
     }
 
-    // Girl's monitor (left) - on top, covering body below head
+    // Girl standing beside her monitor (fully visible, dancing)
     if (leftApp > 0) {
         ctx.save();
         ctx.globalAlpha = alpha * leftApp;
-        drawPixelMonitor(W * 0.3, deskY, s, 'girl');
+        const danceBob = Math.sin(time * 0.005) * 0.5;
+        drawCharacter('girl', girlCharX, groundY, charS, danceBob > 0 ? (time % 2000) / 2000 : 0, false);
         ctx.restore();
     }
 
-    // Boy's monitor (right) - on top, covering body below head
+    // Boy standing beside his monitor (fully visible, dancing)
     if (rightApp > 0) {
         ctx.save();
         ctx.globalAlpha = alpha * rightApp;
-        drawPixelMonitor(W * 0.7, deskY, s, 'boy');
+        const danceBob = Math.sin(time * 0.005 + 1.5) * 0.5;
+        drawCharacter('boy', boyCharX, groundY, charS, danceBob > 0 ? (time % 2000) / 2000 : 0, true);
         ctx.restore();
     }
 
@@ -967,8 +976,8 @@ function drawDiscordScene(time, sceneT, alpha) {
         ctx.strokeStyle = '#5865F2';
         ctx.lineWidth = Math.max(1, s * 0.6);
         ctx.beginPath();
-        ctx.moveTo(W * 0.3 + 14 * s, deskY - 12 * s);
-        ctx.quadraticCurveTo(W * 0.5, deskY - 30 * s, W * 0.7 - 14 * s, deskY - 12 * s);
+        ctx.moveTo(girlMonX + 14 * s, deskY - 12 * s);
+        ctx.quadraticCurveTo(W * 0.5, deskY - 30 * s, boyMonX - 14 * s, deskY - 12 * s);
         ctx.stroke();
 
         // Traveling dots along curve
@@ -976,8 +985,8 @@ function drawDiscordScene(time, sceneT, alpha) {
             const dt = ((time * 0.0008 + i * 0.2) % 1);
             const t1 = 1 - dt;
             const cp = { x: W * 0.5, y: deskY - 30 * s };
-            const p0 = { x: W * 0.3 + 14 * s, y: deskY - 12 * s };
-            const p1 = { x: W * 0.7 - 14 * s, y: deskY - 12 * s };
+            const p0 = { x: girlMonX + 14 * s, y: deskY - 12 * s };
+            const p1 = { x: boyMonX - 14 * s, y: deskY - 12 * s };
             const tx = t1 * t1 * p0.x + 2 * t1 * dt * cp.x + dt * dt * p1.x;
             const ty = t1 * t1 * p0.y + 2 * t1 * dt * cp.y + dt * dt * p1.y;
             ctx.globalAlpha = alpha * connP * 0.5;
