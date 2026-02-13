@@ -783,6 +783,81 @@ function drawPixelNote(x, y, s, color) {
     ctx.fillRect(x + 1.5 * s, y - s, s * 0.6, s);
 }
 
+// Person dancing at their desk (head + headphones peeking above monitor)
+function drawDancingPerson(cx, cy, s, type, time) {
+    const bob = Math.sin(time * 0.005) * s * 2.5;
+    const tilt = Math.sin(time * 0.003 + (type === 'boy' ? 1.5 : 0)) * 0.06;
+    const armPhase = time * 0.006 + (type === 'boy' ? Math.PI * 0.5 : 0);
+
+    ctx.save();
+    ctx.translate(cx, cy + bob);
+    ctx.rotate(tilt);
+
+    if (type === 'girl') {
+        // Hair
+        ctx.fillStyle = '#5a2d0c';
+        ctx.fillRect(-4*s, -10*s, 8*s, 2*s);
+        ctx.fillRect(-5*s, -8*s, 10*s, 3*s);
+        ctx.fillRect(-6*s, -5*s, 2*s, 6*s);
+        ctx.fillRect(4*s, -5*s, 2*s, 6*s);
+        // Face
+        ctx.fillStyle = '#fdd9b5';
+        ctx.fillRect(-4*s, -5*s, 8*s, 5*s);
+        // Eyes
+        ctx.fillStyle = '#2c3e50';
+        ctx.fillRect(-3*s, -3*s, 2*s, s);
+        ctx.fillRect(1*s, -3*s, 2*s, s);
+        // Blush
+        ctx.fillStyle = '#ffb6c1';
+        ctx.fillRect(-4*s, -2*s, 2*s, s);
+        ctx.fillRect(2*s, -2*s, 2*s, s);
+        // Smile
+        ctx.fillStyle = '#e74c3c';
+        ctx.fillRect(-2*s, 0, 4*s, s);
+        // Shoulders
+        ctx.fillStyle = '#ff6b9d';
+        ctx.fillRect(-5*s, s, 10*s, 3*s);
+    } else {
+        // Hair
+        ctx.fillStyle = '#3a2a1a';
+        ctx.fillRect(-4*s, -10*s, 8*s, 2*s);
+        ctx.fillRect(-5*s, -8*s, 10*s, 2*s);
+        ctx.fillRect(-5*s, -6*s, 1*s, 2*s);
+        ctx.fillRect(4*s, -6*s, 1*s, 2*s);
+        // Face
+        ctx.fillStyle = '#fdd9b5';
+        ctx.fillRect(-4*s, -6*s, 8*s, 5*s);
+        // Eyes
+        ctx.fillStyle = '#2c3e50';
+        ctx.fillRect(-3*s, -4*s, 2*s, s);
+        ctx.fillRect(1*s, -4*s, 2*s, s);
+        // Smile
+        ctx.fillStyle = '#e74c3c';
+        ctx.fillRect(-1*s, -2*s, 3*s, s);
+        // Shoulders
+        ctx.fillStyle = '#3498db';
+        ctx.fillRect(-5*s, 0, 10*s, 3*s);
+    }
+
+    // Headphones
+    ctx.fillStyle = '#333344';
+    ctx.fillRect(-6.5*s, -7*s, 2*s, 4*s);
+    ctx.fillRect(4.5*s, -7*s, 2*s, 4*s);
+    ctx.fillRect(-5.5*s, -10.5*s, 11*s, s);
+    ctx.fillStyle = '#555566';
+    ctx.fillRect(-6*s, -6*s, 1.5*s, 2*s);
+    ctx.fillRect(5*s, -6*s, 1.5*s, 2*s);
+
+    // Dancing raised hands (peek above monitor)
+    ctx.fillStyle = '#fdd9b5';
+    const armL = Math.sin(armPhase) * s * 4;
+    const armR = Math.sin(armPhase + Math.PI) * s * 4;
+    ctx.fillRect(-8*s, -4*s + armL, 2*s, 2*s);
+    ctx.fillRect(6*s, -4*s + armR, 2*s, 2*s);
+
+    ctx.restore();
+}
+
 function drawDiscordScene(time, sceneT, alpha) {
     ctx.globalAlpha = alpha;
 
@@ -808,6 +883,8 @@ function drawDiscordScene(time, sceneT, alpha) {
 
     const s = Math.max(1.5, Math.min(3.5, Math.min(W, H) / 300));
     const deskY = H * 0.68;
+    const monTop = deskY - 23.5 * s; // top of monitor
+    const cs = s * 0.7; // character scale (smaller to fit above monitor)
 
     // Desk surface
     ctx.fillStyle = '#3a3045';
@@ -840,7 +917,23 @@ function drawDiscordScene(time, sceneT, alpha) {
         ctx.restore();
     }
 
-    // Girl's monitor (left) - she was there first
+    // Girl dancing at left desk (drawn BEFORE monitor so body is behind it)
+    if (leftApp > 0) {
+        ctx.save();
+        ctx.globalAlpha = alpha * leftApp;
+        drawDancingPerson(W * 0.3, monTop + 6 * cs, cs, 'girl', time);
+        ctx.restore();
+    }
+
+    // Boy dancing at right desk (drawn BEFORE monitor)
+    if (rightApp > 0) {
+        ctx.save();
+        ctx.globalAlpha = alpha * rightApp;
+        drawDancingPerson(W * 0.7, monTop + 6 * cs, cs, 'boy', time);
+        ctx.restore();
+    }
+
+    // Girl's monitor (left) - on top, covering body below head
     if (leftApp > 0) {
         ctx.save();
         ctx.globalAlpha = alpha * leftApp;
@@ -848,7 +941,7 @@ function drawDiscordScene(time, sceneT, alpha) {
         ctx.restore();
     }
 
-    // Boy's monitor (right) - joins at ~2s
+    // Boy's monitor (right) - on top, covering body below head
     if (rightApp > 0) {
         ctx.save();
         ctx.globalAlpha = alpha * rightApp;
@@ -1521,8 +1614,9 @@ function drawStoryFrame(time) {
     }
 
     // Scene 2: Moon (7500 - 20000)
+    // localT starts from fade-in so animations play during cross-fade
     if (t >= 7500 && t < 20000) {
-        const localT = Math.max(0, t - 10000);
+        const localT = t - 7500;
         const fi = easeInOut(Math.min(1, (t - 7500) / FADE));
         const fo = easeInOut(Math.min(1, (20000 - t) / FADE));
         drawMoonScene(time, localT, Math.min(fi, fo));
@@ -1530,7 +1624,7 @@ function drawStoryFrame(time) {
 
     // Scene 3: Car (17500 - 30000)
     if (t >= 17500 && t < 30000) {
-        const localT = Math.max(0, t - 20000);
+        const localT = t - 17500;
         const fi = easeInOut(Math.min(1, (t - 17500) / FADE));
         const fo = easeInOut(Math.min(1, (30000 - t) / FADE));
         drawCarScene(time, localT, Math.min(fi, fo));
@@ -1538,7 +1632,7 @@ function drawStoryFrame(time) {
 
     // Scene 4: Boat (27500 - 40000)
     if (t >= 27500 && t < 40000) {
-        const localT = Math.max(0, t - 30000);
+        const localT = t - 27500;
         const fi = easeInOut(Math.min(1, (t - 27500) / FADE));
         const fo = easeInOut(Math.min(1, (40000 - t) / FADE));
         drawBoatScene(time, localT, Math.min(fi, fo));
@@ -1546,7 +1640,7 @@ function drawStoryFrame(time) {
 
     // Scene 5: Heart + celebration (37500 - 57000)
     if (t >= 37500 && t < 57000) {
-        const localT = Math.max(0, t - 40000);
+        const localT = t - 37500;
         const fi = easeInOut(Math.min(1, (t - 37500) / FADE));
         const fo = easeInOut(Math.min(1, (57000 - t) / FADE));
         drawHeartScene(time, localT, Math.min(fi, fo));
