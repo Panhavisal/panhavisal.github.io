@@ -111,6 +111,7 @@
             width: 90%;
             max-width: 600px;
             opacity: 0;
+            transition: opacity 0.1s;
         }
 
         /* ====== MUSIC BUTTON ====== */
@@ -179,32 +180,37 @@
 // ================================================================
 // CONFIGURATION
 // ================================================================
-const STORY_DURATION = 44000; // 44 seconds per loop
+const STORY_DURATION = 60000; // 60 seconds per loop
+const FADE = 2500; // 2.5s cross-fade
 
-// Scene timeline with text overlays
+// Scene timeline (chronological story order)
 const SCENES = [
-    // Scene 1: Moon gazing (she loves the moon)
-    { start: 0,     end: 11000, id: 'moon',
+    // Scene 1: How we met - Discord
+    { start: 0,     end: 10000, id: 'discord',
+      text: 'It all began on Discord...\nYou invited my music bot,\nand I came to listen with you' },
+
+    // Scene 2: She loves the moon
+    { start: 10000, end: 20000, id: 'moon',
       text: 'You always loved\nthe beautiful moon...' },
 
-    // Scene 2: She drove him home when hurt
-    { start: 11000, end: 21000, id: 'car',
+    // Scene 3: She drove him home when hurt
+    { start: 20000, end: 30000, id: 'car',
       text: 'When I was hurt,\nyou were always there\nfor me...' },
 
-    // Scene 3: Boat ride watching sunset
-    { start: 21000, end: 31000, id: 'boat',
-      text: 'That sunset on the river\nwith you... I\'ll never forget' },
+    // Scene 4: Boat ride watching sunset
+    { start: 30000, end: 40000, id: 'boat',
+      text: 'That sunset on the river\nwith you...\nI\'ll never forget' },
 
-    // Scene 4: Heart + celebration
-    { start: 31000, end: 39000, id: 'heart',
+    // Scene 5: Heart + celebration
+    { start: 40000, end: 50000, id: 'heart',
       text: 'Happy Valentine\'s Day\nAlice!' },
 
-    // Scene 5: Final message
-    { start: 37000, end: 42000, id: 'message',
+    // Scene 6: Final message
+    { start: 48000, end: 55000, id: 'message',
       text: 'Every love story is\nbeautiful, but ours\nis my favorite' },
 
-    // Scene 6: Fade out
-    { start: 41000, end: 44000, id: 'fadeout',
+    // Scene 7: Fade out
+    { start: 54000, end: 60000, id: 'fadeout',
       text: 'Forever yours,\nElwood' },
 ];
 
@@ -514,7 +520,6 @@ function drawFullMoon(mx, my, time) {
     const ps = Math.max(2, Math.round(moonR / 9));
     const pxR = Math.round(moonR / ps);
 
-    // Outer glow
     ctx.globalAlpha = 0.06;
     ctx.fillStyle = '#fffde0';
     ctx.beginPath();
@@ -526,7 +531,6 @@ function drawFullMoon(mx, my, time) {
     ctx.arc(mx, my, moonR * 1.5, 0, Math.PI * 2);
     ctx.fill();
 
-    // Moon body (pixel circle)
     ctx.globalAlpha = 1;
     ctx.fillStyle = '#fffde0';
     for (let dy = -pxR; dy <= pxR; dy++) {
@@ -541,7 +545,6 @@ function drawFullMoon(mx, my, time) {
         }
     }
 
-    // Craters (darker patches)
     ctx.fillStyle = '#e8e0c8';
     const craters = [[-2, -2, 1.2], [2, 1, 1.5], [-1, 3, 1], [3, -1, 0.9]];
     for (const [cx, cy, cr] of craters) {
@@ -585,7 +588,319 @@ function drawFlower(x, y, size, color) {
 }
 
 // ================================================================
-// SCENE 1: MOON GAZING
+// SCENE 1: DISCORD - HOW WE MET
+// ================================================================
+function drawPixelMonitor(cx, deskY, s, owner) {
+    const mw = 24 * s;
+    const mh = 16 * s;
+    const bz = 1.5 * s;
+
+    // Stand
+    ctx.fillStyle = '#444455';
+    ctx.fillRect(cx - 3.5 * s, deskY - 1.5 * s, 7 * s, 2 * s);
+    ctx.fillRect(cx - 1.2 * s, deskY - 4.5 * s, 2.4 * s, 3 * s);
+
+    // Monitor bezel
+    const mx = cx - mw / 2 - bz;
+    const my = deskY - 4.5 * s - mh - bz * 2;
+    ctx.fillStyle = '#2a2a38';
+    ctx.fillRect(mx, my, mw + bz * 2, mh + bz * 2);
+
+    // Screen
+    const sx = mx + bz;
+    const sy = my + bz;
+    ctx.fillStyle = '#36393f';
+    ctx.fillRect(sx, sy, mw, mh);
+
+    // Discord sidebar (dark strip)
+    ctx.fillStyle = '#202225';
+    const sideW = mw * 0.14;
+    ctx.fillRect(sx, sy, sideW, mh);
+
+    // Server dots
+    const dotColors = ['#5865F2', '#57F287', '#EB459E'];
+    const dotS = s * 1.2;
+    for (let i = 0; i < dotColors.length; i++) {
+        ctx.fillStyle = dotColors[i];
+        ctx.fillRect(
+            sx + sideW / 2 - dotS / 2,
+            sy + s * 1.8 + i * (dotS + s * 0.7),
+            dotS, dotS
+        );
+    }
+
+    // Channel list
+    ctx.fillStyle = '#2f3136';
+    const chanW = mw * 0.22;
+    ctx.fillRect(sx + sideW, sy, chanW, mh);
+
+    // Channel text lines
+    ctx.fillStyle = '#72767d';
+    for (let i = 0; i < 3; i++) {
+        ctx.fillRect(
+            sx + sideW + s * 0.8,
+            sy + s * 2 + i * s * 2.2,
+            chanW - s * 1.6,
+            s * 0.6
+        );
+    }
+
+    // Voice connected (green indicator)
+    ctx.fillStyle = '#57F287';
+    ctx.fillRect(sx + sideW + s * 0.6, sy + mh - s * 3.5, s, s);
+    ctx.fillStyle = '#3ba55d';
+    ctx.fillRect(sx + sideW + s * 2, sy + mh - s * 3.3, chanW - s * 3.5, s * 0.5);
+
+    // Chat area messages
+    const chatX = sx + sideW + chanW;
+    const chatW = mw - sideW - chanW;
+    ctx.fillStyle = '#40444b';
+    for (let i = 0; i < 4; i++) {
+        const lw = chatW * (0.35 + ((i * 13 + 7) % 5) * 0.1);
+        ctx.fillRect(chatX + s, sy + s * 2 + i * s * 2.8, lw, s * 0.6);
+    }
+
+    // Owner glow at bottom
+    const glowColor = owner === 'girl' ? '#EB459E' : '#5865F2';
+    ctx.save();
+    ctx.globalAlpha = ctx.globalAlpha * 0.25;
+    ctx.fillStyle = glowColor;
+    ctx.fillRect(sx, sy + mh - s * 1.8, mw, s * 1.8);
+    ctx.restore();
+}
+
+function drawMusicBot(cx, cy, s, time) {
+    // Antenna
+    ctx.fillStyle = '#888899';
+    ctx.fillRect(cx - 0.5 * s, cy - 10 * s, 1 * s, 3 * s);
+    // Antenna light (blinks)
+    const blink = Math.sin(time * 0.005) > 0 ? '#57F287' : '#3ba55d';
+    ctx.fillStyle = blink;
+    ctx.fillRect(cx - 1 * s, cy - 11.5 * s, 2 * s, 1.5 * s);
+
+    // Headband
+    ctx.fillStyle = '#333344';
+    ctx.fillRect(cx - 5.5 * s, cy - 8.5 * s, 11 * s, 1.5 * s);
+
+    // Headphones
+    ctx.fillStyle = '#333344';
+    ctx.fillRect(cx - 7 * s, cy - 7 * s, 2.5 * s, 4.5 * s);
+    ctx.fillRect(cx + 4.5 * s, cy - 7 * s, 2.5 * s, 4.5 * s);
+    // Headphone cushion
+    ctx.fillStyle = '#555566';
+    ctx.fillRect(cx - 6.5 * s, cy - 6 * s, 1.5 * s, 2.5 * s);
+    ctx.fillRect(cx + 5 * s, cy - 6 * s, 1.5 * s, 2.5 * s);
+
+    // Head
+    ctx.fillStyle = '#5865F2';
+    ctx.fillRect(cx - 5 * s, cy - 7.5 * s, 10 * s, 8 * s);
+
+    // Eyes
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(cx - 3 * s, cy - 5.5 * s, 2 * s, 2.5 * s);
+    ctx.fillRect(cx + 1 * s, cy - 5.5 * s, 2 * s, 2.5 * s);
+    // Pupils
+    ctx.fillStyle = '#1a1a2e';
+    ctx.fillRect(cx - 2.5 * s, cy - 4.5 * s, 1.2 * s, 1.5 * s);
+    ctx.fillRect(cx + 1.5 * s, cy - 4.5 * s, 1.2 * s, 1.5 * s);
+
+    // Mouth (happy)
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(cx - 2 * s, cy - 1.5 * s, 4 * s, 1 * s);
+
+    // Body
+    ctx.fillStyle = '#4752c4';
+    ctx.fillRect(cx - 4 * s, cy + 1 * s, 8 * s, 5 * s);
+
+    // Music note on body
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(cx + 0.5 * s, cy + 2 * s, s * 0.8, s * 3);
+    ctx.fillRect(cx - 1 * s, cy + 4 * s, 2 * s, s);
+    ctx.fillRect(cx + 1.3 * s, cy + 2 * s, s, s);
+
+    // Arms
+    ctx.fillStyle = '#4752c4';
+    ctx.fillRect(cx - 5.5 * s, cy + 2 * s, 1.5 * s, 3.5 * s);
+    ctx.fillRect(cx + 4 * s, cy + 2 * s, 1.5 * s, 3.5 * s);
+}
+
+function drawPixelNote(x, y, s, color) {
+    ctx.fillStyle = color;
+    // Note head
+    ctx.fillRect(x - s, y + s, 2 * s, 1.5 * s);
+    // Stem
+    ctx.fillRect(x + s * 0.5, y - 2 * s, s, 3.5 * s);
+    // Flag
+    ctx.fillRect(x + 1.5 * s, y - 2 * s, s, s);
+    ctx.fillRect(x + 1.5 * s, y - s, s * 0.6, s);
+}
+
+function drawDiscordScene(time, sceneT, alpha) {
+    ctx.globalAlpha = alpha;
+
+    // Background - dark room with purple/blue tint
+    const grad = ctx.createLinearGradient(0, 0, 0, H);
+    grad.addColorStop(0, '#111120');
+    grad.addColorStop(0.5, '#191830');
+    grad.addColorStop(1, '#14132a');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, W, H);
+
+    // Ambient sparkles (screen glow particles)
+    ctx.imageSmoothingEnabled = false;
+    for (let i = 0; i < 35; i++) {
+        const sx = (Math.sin(i * 77.7 + time * 0.0003) * 0.5 + 0.5) * W;
+        const sy = (Math.cos(i * 33.3 + time * 0.0004) * 0.5 + 0.5) * H;
+        const sa = 0.08 + 0.08 * Math.sin(time * 0.002 + i);
+        ctx.globalAlpha = alpha * sa;
+        ctx.fillStyle = i % 3 === 0 ? '#5865F2' : (i % 3 === 1 ? '#ff6b9d' : '#ffffff');
+        ctx.fillRect(Math.round(sx), Math.round(sy), 2, 2);
+    }
+    ctx.globalAlpha = alpha;
+
+    const s = Math.max(1.5, Math.min(3.5, Math.min(W, H) / 300));
+    const deskY = H * 0.68;
+
+    // Desk surface
+    ctx.fillStyle = '#3a3045';
+    ctx.fillRect(0, deskY, W, 3 * s);
+    ctx.fillStyle = '#2a2235';
+    ctx.fillRect(0, deskY + 3 * s, W, H - deskY - 3 * s);
+
+    // Monitor glow on desk
+    const leftApp = easeInOut(Math.min(1, sceneT / 1500));
+    if (leftApp > 0) {
+        ctx.save();
+        ctx.globalAlpha = alpha * leftApp * 0.08;
+        const grd1 = ctx.createRadialGradient(W * 0.3, deskY - 5 * s, 0, W * 0.3, deskY - 5 * s, 18 * s);
+        grd1.addColorStop(0, '#5865F2');
+        grd1.addColorStop(1, 'rgba(88,101,242,0)');
+        ctx.fillStyle = grd1;
+        ctx.fillRect(W * 0.3 - 20 * s, deskY - 20 * s, 40 * s, 25 * s);
+        ctx.restore();
+    }
+
+    const rightApp = easeInOut(progress(2000, 3500, sceneT));
+    if (rightApp > 0) {
+        ctx.save();
+        ctx.globalAlpha = alpha * rightApp * 0.08;
+        const grd2 = ctx.createRadialGradient(W * 0.7, deskY - 5 * s, 0, W * 0.7, deskY - 5 * s, 18 * s);
+        grd2.addColorStop(0, '#EB459E');
+        grd2.addColorStop(1, 'rgba(235,69,158,0)');
+        ctx.fillStyle = grd2;
+        ctx.fillRect(W * 0.7 - 20 * s, deskY - 20 * s, 40 * s, 25 * s);
+        ctx.restore();
+    }
+
+    // Girl's monitor (left) - she was there first
+    if (leftApp > 0) {
+        ctx.save();
+        ctx.globalAlpha = alpha * leftApp;
+        drawPixelMonitor(W * 0.3, deskY, s, 'girl');
+        ctx.restore();
+    }
+
+    // Boy's monitor (right) - joins at ~2s
+    if (rightApp > 0) {
+        ctx.save();
+        ctx.globalAlpha = alpha * rightApp;
+        drawPixelMonitor(W * 0.7, deskY, s, 'boy');
+        ctx.restore();
+    }
+
+    // Music bot (center, above monitors) - appears at ~1.5s
+    const botApp = easeInOut(progress(1500, 3000, sceneT));
+    if (botApp > 0) {
+        const botBob = Math.sin(time * 0.003) * s * 2;
+        ctx.save();
+        ctx.globalAlpha = alpha * botApp;
+        drawMusicBot(W * 0.5, deskY - 20 * s + botBob, s * 1.5, time);
+        ctx.restore();
+    }
+
+    // Connection arc between monitors
+    if (sceneT > 3000) {
+        const connP = easeInOut(progress(3000, 4500, sceneT));
+        ctx.save();
+        ctx.globalAlpha = alpha * connP * 0.25;
+        ctx.strokeStyle = '#5865F2';
+        ctx.lineWidth = Math.max(1, s * 0.6);
+        ctx.beginPath();
+        ctx.moveTo(W * 0.3 + 14 * s, deskY - 12 * s);
+        ctx.quadraticCurveTo(W * 0.5, deskY - 30 * s, W * 0.7 - 14 * s, deskY - 12 * s);
+        ctx.stroke();
+
+        // Traveling dots along curve
+        for (let i = 0; i < 5; i++) {
+            const dt = ((time * 0.0008 + i * 0.2) % 1);
+            const t1 = 1 - dt;
+            const cp = { x: W * 0.5, y: deskY - 30 * s };
+            const p0 = { x: W * 0.3 + 14 * s, y: deskY - 12 * s };
+            const p1 = { x: W * 0.7 - 14 * s, y: deskY - 12 * s };
+            const tx = t1 * t1 * p0.x + 2 * t1 * dt * cp.x + dt * dt * p1.x;
+            const ty = t1 * t1 * p0.y + 2 * t1 * dt * cp.y + dt * dt * p1.y;
+            ctx.globalAlpha = alpha * connP * 0.5;
+            ctx.fillStyle = i % 2 === 0 ? '#5865F2' : '#ff6b9d';
+            ctx.fillRect(Math.round(tx) - 1, Math.round(ty) - 1, 3, 3);
+        }
+        ctx.restore();
+    }
+
+    // Floating music notes
+    if (sceneT > 3500) {
+        const noteP = easeInOut(progress(3500, 5000, sceneT));
+        const cx = W * 0.5;
+        const baseY = deskY - 22 * s;
+        const ns = s * 1.3;
+
+        for (let i = 0; i < 8; i++) {
+            const phase = ((sceneT - 3500) * 0.0008 + i * 1.1) % 3.5;
+            if (phase > 3) continue;
+            const ny = baseY - phase * H * 0.06;
+            const nx = cx + Math.sin(phase * 2.5 + i * 1.7) * W * 0.08;
+            const na = Math.min(1, phase * 2) * Math.max(0, 1 - phase / 3);
+
+            ctx.save();
+            ctx.globalAlpha = alpha * noteP * na;
+            drawPixelNote(nx, ny, ns, i % 2 === 0 ? '#5865F2' : '#ff6b9d');
+            ctx.restore();
+        }
+    }
+
+    // Hearts drifting between monitors
+    if (sceneT > 5500) {
+        const heartP = easeInOut(progress(5500, 7000, sceneT));
+
+        for (let i = 0; i < 6; i++) {
+            const phase = ((sceneT - 5500) * 0.0007 + i * 0.85) % 3;
+            const hx = W * 0.5 + Math.sin(phase * 3 + i * 2.1) * W * 0.15;
+            const hy = deskY - 5 * s - phase * H * 0.06;
+            const ha = Math.min(1, phase * 2.5) * Math.max(0, 1 - phase / 2.5);
+            const hs = s * 0.9;
+
+            ctx.save();
+            ctx.globalAlpha = alpha * heartP * ha;
+            ctx.fillStyle = i % 2 === 0 ? '#ff3d7f' : '#ff6b9d';
+            for (let r = 0; r < MINI_HEART.length; r++) {
+                for (let c = 0; c < MINI_HEART[r].length; c++) {
+                    if (MINI_HEART[r][c]) {
+                        ctx.fillRect(
+                            Math.round(hx + (c - 3) * hs),
+                            Math.round(hy + r * hs),
+                            Math.ceil(hs), Math.ceil(hs)
+                        );
+                    }
+                }
+            }
+            ctx.restore();
+        }
+    }
+
+    ctx.globalAlpha = 1;
+}
+
+// ================================================================
+// SCENE 2: MOON GAZING
 // ================================================================
 function drawMoonScene(time, sceneT, alpha) {
     ctx.globalAlpha = alpha;
@@ -595,17 +910,12 @@ function drawMoonScene(time, sceneT, alpha) {
     const groundY = H * 0.78;
     const s = getCharScale();
 
-    // Big beautiful full moon (upper right)
     drawFullMoon(W * 0.65, H * 0.22, time);
-
-    // Ground
     drawGrass(groundY);
 
-    // Characters appear, standing together looking at moon
-    const appear = easeInOut(Math.min(1, sceneT / 2000));
+    const appear = easeInOut(Math.min(1, sceneT / 2500));
     ctx.globalAlpha = alpha * appear;
 
-    // They stand side by side, facing right (toward moon)
     drawCharacter('boy', W * 0.35, groundY, s, 0, false);
     drawCharacter('girl', W * 0.45, groundY, s, 0, false);
 
@@ -613,11 +923,9 @@ function drawMoonScene(time, sceneT, alpha) {
 }
 
 // ================================================================
-// SCENE 2: SHE DROVE HIM HOME (car scene)
+// SCENE 3: SHE DROVE HIM HOME (car scene)
 // ================================================================
 function drawPixelCar(cx, cy, s, time) {
-    // cy = bottom of car (road level)
-
     // Body
     ctx.fillStyle = '#ff6b9d';
     ctx.fillRect(cx - 16 * s, cy - 8 * s, 32 * s, 8 * s);
@@ -626,7 +934,7 @@ function drawPixelCar(cx, cy, s, time) {
     ctx.fillStyle = '#ff3d7f';
     ctx.fillRect(cx - 9 * s, cy - 15 * s, 18 * s, 7 * s);
 
-    // Windshield (front)
+    // Windshield
     ctx.fillStyle = '#6bb8e8';
     ctx.fillRect(cx - 8 * s, cy - 14 * s, 7 * s, 5 * s);
 
@@ -634,19 +942,19 @@ function drawPixelCar(cx, cy, s, time) {
     ctx.fillStyle = '#6bb8e8';
     ctx.fillRect(cx + 1 * s, cy - 14 * s, 7 * s, 5 * s);
 
-    // Girl (driver) silhouette in front window
+    // Girl (driver)
     ctx.fillStyle = '#5a2d0c';
     ctx.fillRect(cx - 6 * s, cy - 13 * s, 4 * s, 2 * s);
     ctx.fillStyle = '#fdd9b5';
     ctx.fillRect(cx - 6 * s, cy - 11 * s, 4 * s, 2 * s);
 
-    // Boy (passenger) silhouette in rear window
+    // Boy (passenger)
     ctx.fillStyle = '#3a2a1a';
     ctx.fillRect(cx + 3 * s, cy - 13 * s, 4 * s, 2 * s);
     ctx.fillStyle = '#fdd9b5';
     ctx.fillRect(cx + 3 * s, cy - 11 * s, 4 * s, 2 * s);
 
-    // Boy's bandaged leg hint (white on pants area)
+    // Boy's bandaged leg
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(cx + 5 * s, cy - 5 * s, 3 * s, 2 * s);
 
@@ -672,7 +980,6 @@ function drawPixelCar(cx, cy, s, time) {
 function drawCarScene(time, sceneT, alpha) {
     ctx.globalAlpha = alpha;
 
-    // Night sky
     drawNightSky();
     drawTwinklingStars(time, alpha * 0.4);
 
@@ -697,38 +1004,35 @@ function drawCarScene(time, sceneT, alpha) {
         ctx.fillRect(x, roadY + roadH / 2 - 1, dashW, 3);
     }
 
-    // Grass areas
+    // Grass
     ctx.fillStyle = '#0f250f';
     ctx.fillRect(0, roadY + roadH, W, H - roadY - roadH);
 
-    // Simple pixel trees passing by
+    // Passing trees
     const treeSpeed = sceneT * 0.08;
-    ctx.fillStyle = '#0a1a0a';
     for (let i = 0; i < 6; i++) {
         const tx = ((i * W / 4) - (treeSpeed % (W * 1.5)) + W * 2) % (W * 1.5) - W * 0.25;
         const th = H * 0.15 + (i % 3) * H * 0.03;
-        // Trunk
         ctx.fillStyle = '#3a2510';
         ctx.fillRect(tx - 3, roadY - th + th * 0.6, 6, th * 0.4);
-        // Foliage
         ctx.fillStyle = '#0a2a0a';
         ctx.fillRect(tx - 15, roadY - th, 30, th * 0.65);
         ctx.fillStyle = '#0f350f';
         ctx.fillRect(tx - 12, roadY - th + 5, 24, th * 0.5);
     }
 
-    // Car (centered, road scrolls behind it)
+    // Car
     const carS = Math.max(2, Math.round(Math.min(W, H) / 350));
     const carBob = Math.sin(time * 0.004) * 1.5;
     drawPixelCar(W * 0.5, roadY + roadH * 0.4 + carBob, carS, time);
 
-    // Small heart above the car
+    // Small heart above car
     const hFloat = Math.sin(time * 0.004) * 5;
     const hx = W * 0.5;
     const hy = roadY - H * 0.15 + hFloat;
     const hs = carS * 0.8;
-    ctx.fillStyle = '#ff3d7f';
     ctx.globalAlpha = alpha * 0.7;
+    ctx.fillStyle = '#ff3d7f';
     for (let r = 0; r < MINI_HEART.length; r++) {
         for (let c = 0; c < MINI_HEART[r].length; c++) {
             if (MINI_HEART[r][c]) {
@@ -745,7 +1049,7 @@ function drawCarScene(time, sceneT, alpha) {
 }
 
 // ================================================================
-// SCENE 3: BOAT RIDE AT SUNSET
+// SCENE 4: BOAT RIDE AT SUNSET
 // ================================================================
 function drawBoatScene(time, sceneT, alpha) {
     ctx.globalAlpha = alpha;
@@ -753,7 +1057,7 @@ function drawBoatScene(time, sceneT, alpha) {
     const horizon = H * 0.5;
     const waterY = horizon;
 
-    // Sunset sky gradient
+    // Sunset sky
     const grad = ctx.createLinearGradient(0, 0, 0, horizon);
     grad.addColorStop(0, '#1a0a3a');
     grad.addColorStop(0.3, '#6b2fa0');
@@ -763,7 +1067,7 @@ function drawBoatScene(time, sceneT, alpha) {
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, W, horizon);
 
-    // Sun (setting at horizon)
+    // Sun
     const sunR = Math.min(W, H) * 0.07;
     const sunX = W * 0.5;
     const sunY = horizon - sunR * 0.3;
@@ -782,7 +1086,7 @@ function drawBoatScene(time, sceneT, alpha) {
     ctx.arc(sunX, sunY, sunR * 1.8, 0, Math.PI * 2);
     ctx.fill();
 
-    // Sun body (pixel circle, only top half above water)
+    // Sun body (pixel circle, clipped above water)
     ctx.globalAlpha = alpha;
     ctx.fillStyle = '#ffcc44';
     for (let dy = -pxR; dy <= pxR; dy++) {
@@ -805,7 +1109,7 @@ function drawBoatScene(time, sceneT, alpha) {
     ctx.fillStyle = waterGrad;
     ctx.fillRect(0, waterY, W, H - waterY);
 
-    // Sun reflection on water
+    // Sun reflection
     ctx.globalAlpha = alpha * 0.25;
     ctx.fillStyle = '#ffaa44';
     for (let y = waterY; y < waterY + H * 0.3; y += 6) {
@@ -814,7 +1118,7 @@ function drawBoatScene(time, sceneT, alpha) {
         ctx.fillRect(sunX - spread + flicker, y, spread * 2, 2);
     }
 
-    // Water shimmer lines
+    // Water shimmer
     ctx.globalAlpha = alpha * 0.15;
     ctx.fillStyle = '#ffffff';
     for (let y = waterY + 10; y < H; y += 15) {
@@ -840,20 +1144,18 @@ function drawBoatScene(time, sceneT, alpha) {
     ctx.fillStyle = '#8b5a2b';
     ctx.fillRect(-14 * bs, 0, 28 * bs, 3 * bs);
     ctx.fillRect(-16 * bs, -3 * bs, 32 * bs, 3 * bs);
-    // Hull edges
     ctx.fillStyle = '#6b3a1b';
     ctx.fillRect(-17 * bs, -3 * bs, 1 * bs, 3 * bs);
     ctx.fillRect(16 * bs, -3 * bs, 1 * bs, 3 * bs);
-    // Hull bottom
     ctx.fillRect(-12 * bs, 3 * bs, 24 * bs, 2 * bs);
 
-    // Characters sitting in boat
+    // Characters in boat
     drawCharUpperBody('boy', -5 * bs, -3 * bs, bs * 0.9);
     drawCharUpperBody('girl', 7 * bs, -3 * bs, bs * 0.9);
 
     ctx.restore();
 
-    // Birds in sky (V shapes)
+    // Birds
     ctx.fillStyle = '#1a0a3a';
     ctx.globalAlpha = alpha * 0.5;
     const birds = [[0.2, 0.15], [0.25, 0.12], [0.7, 0.18], [0.75, 0.14]];
@@ -870,7 +1172,7 @@ function drawBoatScene(time, sceneT, alpha) {
 }
 
 // ================================================================
-// SCENE 4: HEART + CELEBRATION
+// SCENE 5: HEART + CELEBRATION
 // ================================================================
 function drawHeartScene(time, sceneT, alpha) {
     ctx.globalAlpha = alpha;
@@ -899,14 +1201,14 @@ function drawHeartScene(time, sceneT, alpha) {
         ctx.globalAlpha = alpha;
     }
 
-    // Characters walk toward each other and meet
+    // Characters walk and meet
     const walkP = Math.min(1, sceneT / 3000);
     const spread = lerp(60, 12, easeInOut(walkP)) * s / 4;
 
     drawCharacter('boy', centerX - spread, groundY, s, walkP < 1 ? walkP : 0, false);
     drawCharacter('girl', centerX + spread, groundY, s, walkP < 1 ? walkP : 0, true);
 
-    // Big heart grows above them
+    // Big heart
     const heartP = progress(2000, 4000, sceneT);
     if (heartP > 0) {
         const heartPS = easeInOut(heartP) * s * 0.6;
@@ -917,7 +1219,6 @@ function drawHeartScene(time, sceneT, alpha) {
         ctx.translate(centerX, heartY);
         ctx.scale(heartBeat, heartBeat);
 
-        // Glow
         ctx.fillStyle = '#ff3d7f';
         ctx.globalAlpha = alpha * heartP * 0.15;
         ctx.beginPath();
@@ -942,14 +1243,14 @@ function drawHeartScene(time, sceneT, alpha) {
         ctx.restore();
     }
 
-    // Fireworks
-    if (sceneT > 2500 && sceneT < 7500 && Math.random() < 0.05) {
+    // Fireworks (extended window for longer scene)
+    if (sceneT > 2500 && sceneT < 14000 && Math.random() < 0.05) {
         spawnFirework(
             W * 0.15 + Math.random() * W * 0.7,
             H * 0.08 + Math.random() * H * 0.25
         );
     }
-    if (sceneT > 2000 && sceneT < 7000 && Math.random() < 0.07) {
+    if (sceneT > 2000 && sceneT < 12000 && Math.random() < 0.07) {
         spawnFloatHeart(
             centerX - W * 0.15 + Math.random() * W * 0.3,
             groundY - 10
@@ -1042,65 +1343,68 @@ function drawStoryFrame(time) {
     }
 
     ctx.clearRect(0, 0, W, H);
-
-    // Black base
     ctx.fillStyle = '#050010';
     ctx.fillRect(0, 0, W, H);
 
-    // Scene transitions: each scene fades in/out over 1.5s
-    const FADE = 1500;
-
-    // Scene 1: Moon (0 - 11000)
-    if (t < 11000) {
-        const fi = Math.min(1, t / FADE);
-        const fo = Math.min(1, (11000 - t) / FADE);
-        drawMoonScene(time, t, Math.min(fi, fo));
+    // Scene 1: Discord (0 - 10000) with 2.5s easeInOut fades
+    if (t < 10000) {
+        const fi = easeInOut(Math.min(1, t / FADE));
+        const fo = easeInOut(Math.min(1, (10000 - t) / FADE));
+        drawDiscordScene(time, t, Math.min(fi, fo));
     }
 
-    // Scene 2: Car (11000 - 21000)
-    if (t >= 9500 && t < 21000) {
-        const localT = t - 11000;
-        const fi = Math.min(1, (t - 9500) / FADE);
-        const fo = Math.min(1, (21000 - t) / FADE);
-        drawCarScene(time, Math.max(0, localT), Math.min(fi, fo));
+    // Scene 2: Moon (7500 - 20000)
+    if (t >= 7500 && t < 20000) {
+        const localT = Math.max(0, t - 10000);
+        const fi = easeInOut(Math.min(1, (t - 7500) / FADE));
+        const fo = easeInOut(Math.min(1, (20000 - t) / FADE));
+        drawMoonScene(time, localT, Math.min(fi, fo));
     }
 
-    // Scene 3: Boat (21000 - 31000)
-    if (t >= 19500 && t < 31000) {
-        const localT = t - 21000;
-        const fi = Math.min(1, (t - 19500) / FADE);
-        const fo = Math.min(1, (31000 - t) / FADE);
-        drawBoatScene(time, Math.max(0, localT), Math.min(fi, fo));
+    // Scene 3: Car (17500 - 30000)
+    if (t >= 17500 && t < 30000) {
+        const localT = Math.max(0, t - 20000);
+        const fi = easeInOut(Math.min(1, (t - 17500) / FADE));
+        const fo = easeInOut(Math.min(1, (30000 - t) / FADE));
+        drawCarScene(time, localT, Math.min(fi, fo));
     }
 
-    // Scene 4: Heart + Celebration (31000 - 40000)
-    if (t >= 29500 && t < 40000) {
-        const localT = t - 31000;
-        const fi = Math.min(1, (t - 29500) / FADE);
-        const fo = Math.min(1, (40000 - t) / FADE);
-        drawHeartScene(time, Math.max(0, localT), Math.min(fi, fo));
+    // Scene 4: Boat (27500 - 40000)
+    if (t >= 27500 && t < 40000) {
+        const localT = Math.max(0, t - 30000);
+        const fi = easeInOut(Math.min(1, (t - 27500) / FADE));
+        const fo = easeInOut(Math.min(1, (40000 - t) / FADE));
+        drawBoatScene(time, localT, Math.min(fi, fo));
     }
 
-    // Particles (on top)
+    // Scene 5: Heart + celebration (37500 - 57000)
+    if (t >= 37500 && t < 57000) {
+        const localT = Math.max(0, t - 40000);
+        const fi = easeInOut(Math.min(1, (t - 37500) / FADE));
+        const fo = easeInOut(Math.min(1, (57000 - t) / FADE));
+        drawHeartScene(time, localT, Math.min(fi, fo));
+    }
+
+    // Particles (on top of scenes)
     drawAndUpdateFireworks();
     drawAndUpdateFloatHearts();
 
-    // Final fade to black (42-44s)
-    if (t > 42000) {
-        const fadeP = progress(42000, 44000, t);
+    // Final fade to black (56-60s)
+    if (t > 56000) {
+        const fadeP = easeInOut(progress(56000, 60000, t));
         ctx.fillStyle = `rgba(5, 0, 16, ${fadeP})`;
         ctx.fillRect(0, 0, W, H);
     }
 
-    // ---- STORY TEXT ----
+    // ---- STORY TEXT with easeInOut ----
     let activeText = '';
     let textOpacity = 0;
 
     for (const scene of SCENES) {
         if (!scene.text) continue;
         if (t >= scene.start && t <= scene.end) {
-            const fi = Math.min(1, (t - scene.start) / 1800);
-            const fo = Math.min(1, (scene.end - t) / 1800);
+            const fi = easeInOut(Math.min(1, (t - scene.start) / 2000));
+            const fo = easeInOut(Math.min(1, (scene.end - t) / 2000));
             const op = Math.min(fi, fo);
             if (op > textOpacity) {
                 activeText = scene.text;
@@ -1116,7 +1420,7 @@ function drawStoryFrame(time) {
 }
 
 // ================================================================
-// MUSIC (new song)
+// MUSIC
 // ================================================================
 let musicPlaying = false;
 const musicBtn = document.getElementById('musicBtn');
@@ -1124,7 +1428,7 @@ const bgMusic = document.getElementById('bgMusic');
 
 function startMusic() {
     if (!musicPlaying) {
-        bgMusic.src = 'https://www.youtube.com/embed/e5t1XD950Us?autoplay=1&loop=1&playlist=e5t1XD950Us&controls=0&mute=0';
+        bgMusic.src = 'https://www.youtube.com/embed/8XQyQgnVNnY?autoplay=1&loop=1&playlist=8XQyQgnVNnY&controls=0&mute=0';
         musicBtn.classList.add('playing');
         musicBtn.innerHTML = '&#9835; Playing';
         musicPlaying = true;
