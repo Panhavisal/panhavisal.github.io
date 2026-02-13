@@ -49,34 +49,75 @@
             text-align: center;
         }
 
-        .intro-line1 {
-            color: #ff9dc5;
-            font-size: min(16px, 3.5vw);
-            line-height: 2.2;
+        .intro-year {
+            color: #ff3d7f;
+            font-size: min(28px, 6vw);
+            letter-spacing: 0.3em;
             opacity: 0;
-            animation: fadeIn 2s ease 0.5s forwards;
+            animation: fadeIn 2s ease 0.2s forwards;
+            text-shadow: 0 0 30px rgba(255, 61, 127, 0.5), 0 0 60px rgba(255, 61, 127, 0.2);
+        }
+
+        .intro-divider {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin: 14px 0 8px;
+            opacity: 0;
+            animation: fadeIn 1.5s ease 0.6s forwards;
+        }
+
+        .intro-divider-line {
+            width: min(60px, 12vw);
+            height: 2px;
+            background: linear-gradient(to right, transparent, #ff6b9d, transparent);
+        }
+
+        .intro-divider-dot {
+            width: 6px;
+            height: 6px;
+            background: #ff6b9d;
+            transform: rotate(45deg);
+        }
+
+        .intro-subtitle {
+            color: #ff9dc5;
+            font-size: min(10px, 2.2vw);
+            letter-spacing: 0.15em;
+            opacity: 0;
+            animation: fadeIn 1.5s ease 0.8s forwards;
+        }
+
+        .intro-line1 {
+            color: #ffc0d9;
+            font-size: min(13px, 3vw);
+            line-height: 2.2;
+            margin-top: 10px;
+            opacity: 0;
+            animation: fadeIn 2s ease 1.5s forwards;
         }
 
         .intro-line2 {
             color: #ffc0d9;
             font-size: min(11px, 2.5vw);
-            margin-top: 20px;
+            margin-top: 16px;
             opacity: 0;
-            animation: fadeIn 2s ease 2.5s forwards;
+            animation: fadeIn 2s ease 3s forwards;
         }
 
         .intro-heart-box {
-            margin: 30px auto;
+            margin: 20px auto;
             opacity: 0;
-            animation: fadeIn 1.5s ease 1.2s forwards;
+            animation: fadeIn 1.5s ease 2s forwards;
         }
 
         .intro-click {
             color: rgba(255, 192, 217, 0.7);
             font-size: min(9px, 2vw);
-            margin-top: 40px;
+            margin-top: 30px;
             opacity: 0;
-            animation: fadeIn 1s ease 3.5s forwards, pulse 2s ease-in-out 4.5s infinite;
+            animation: fadeIn 1s ease 4s forwards, pulse 2s ease-in-out 5s infinite;
         }
 
         @keyframes fadeIn { to { opacity: 1; } }
@@ -156,6 +197,13 @@
 <div id="intro">
     <canvas id="introCanvas"></canvas>
     <div class="intro-content">
+        <div class="intro-year">2026</div>
+        <div class="intro-divider">
+            <span class="intro-divider-line"></span>
+            <span class="intro-divider-dot"></span>
+            <span class="intro-divider-line"></span>
+        </div>
+        <div class="intro-subtitle">Valentine's Day</div>
         <div class="intro-line1">I made something<br>special for you...</div>
         <div class="intro-heart-box">
             <canvas id="introHeart" width="130" height="120"></canvas>
