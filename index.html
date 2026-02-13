@@ -2,406 +2,949 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Happy Valentine's Day, Alice!</title>
     <style>
-        /* Reset default margins and paddings */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            background: linear-gradient(to bottom, #87ceeb, #f0e68c); /* Sky-like background */
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            background: #0a0015;
+            overflow: hidden;
+            font-family: 'Press Start 2P', monospace;
+            width: 100vw;
             height: 100vh;
-            font-family: 'Georgia', serif;
-            overflow: hidden; /* Hide overflow for floating hearts */
-            position: relative;
         }
 
-        /* Play Sound Button Styling */
-        #play {
-            position: absolute;
-            bottom: 20px;
-            left: 20px;
-            padding: 10px 20px;
-            background-color: #FF1493;
-            color: white;
-            border: none;
-            border-radius: 5px;
+        /* ====== INTRO SCREEN ====== */
+        #intro {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            background: #0a0015;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
             cursor: pointer;
-            z-index: 2;
-            font-size: 16px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-            transition: background-color 0.3s ease;
+            transition: opacity 2s ease;
         }
 
-        #play:hover {
-            background-color: #e91e63;
+        #intro.fade-out {
+            opacity: 0;
+            pointer-events: none;
         }
 
-        .container {
-            text-align: center;
+        #introCanvas {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .intro-content {
             position: relative;
+            z-index: 2;
+            text-align: center;
+        }
+
+        .intro-line1 {
+            color: #ff9dc5;
+            font-size: min(16px, 3.5vw);
+            line-height: 2.2;
+            opacity: 0;
+            animation: fadeIn 2s ease 0.5s forwards;
+        }
+
+        .intro-line2 {
+            color: #ffc0d9;
+            font-size: min(11px, 2.5vw);
+            margin-top: 20px;
+            opacity: 0;
+            animation: fadeIn 2s ease 2.5s forwards;
+        }
+
+        .intro-heart-box {
+            margin: 30px auto;
+            opacity: 0;
+            animation: fadeIn 1.5s ease 1.2s forwards;
+        }
+
+        .intro-click {
+            color: rgba(255, 192, 217, 0.7);
+            font-size: min(9px, 2vw);
+            margin-top: 40px;
+            opacity: 0;
+            animation: fadeIn 1s ease 3.5s forwards, pulse 2s ease-in-out 4.5s infinite;
+        }
+
+        @keyframes fadeIn { to { opacity: 1; } }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.05); }
+        }
+
+        /* ====== STORY CANVAS ====== */
+        #storyCanvas {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
             z-index: 1;
         }
 
-        /* Rose Grow Animation Wrapper */
-        .grow {
-            transform: scale(0);
-            animation: grow 1.5s ease-out forwards;
-        }
-
-        /* Rose Styling and Sway Animation */
-        .rose {
-            width: 300px;      /* Increased from 200 to make the rose bigger */
-            height: 450px;     /* Increased height for a taller rose */
-            transform-origin: bottom center;
-            animation: sway 6s ease-in-out infinite;
-            filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.3)); /* Optional shadow for depth */
-        }
-
-        /* Grow Keyframes */
-        @keyframes grow {
-            from {
-                transform: scale(0);
-                opacity: 0;
-            }
-            to {
-                transform: scale(1);
-                opacity: 1;
-            }
-        }
-
-        /* Sway Keyframes */
-        @keyframes sway {
-            0% { transform: rotate(0deg); }
-            25% { transform: rotate(5deg); }
-            50% { transform: rotate(-5deg); }
-            75% { transform: rotate(3deg); }
-            100% { transform: rotate(0deg); }
-        }
-
-        /* Valentine's Message Styling */
-        .message {
-            margin-top: 20px;
-            color: #333;
-            font-size: 24px;
-            position: relative;
-            height: 150px;
-            overflow: hidden;
-        }
-
-        /* Initial State for Messages */
-        .message span {
-            position: absolute;
-            width: 100%;
-            left: 0;
-            top: 0;
-            opacity: 0;
-            animation-duration: 18s;
-            animation-timing-function: ease-in-out;
-            animation-iteration-count: infinite;
-        }
-
-        /* Individual Messages */
-        .message1 {
-            animation-name: fadeInOut1;
-        }
-        .message2 {
-            animation-name: fadeInOut2;
-        }
-        .message3 {
-            animation-name: fadeInOut3;
-        }
-
-        /* Keyframes for Fading In and Out */
-        @keyframes fadeInOut1 {
-            0%   { opacity: 0; }
-            10%  { opacity: 1; }
-            30%  { opacity: 1; }
-            40%  { opacity: 0; }
-            100% { opacity: 0; }
-        }
-        @keyframes fadeInOut2 {
-            0%   { opacity: 0; }
-            33%  { opacity: 0; }
-            43%  { opacity: 1; }
-            63%  { opacity: 1; }
-            73%  { opacity: 0; }
-            100% { opacity: 0; }
-        }
-        @keyframes fadeInOut3 {
-            0%   { opacity: 0; }
-            66%  { opacity: 0; }
-            76%  { opacity: 1; }
-            96%  { opacity: 1; }
-            100% { opacity: 0; }
-        }
-
-        /* Background Mini Hearts */
-        .heart {
-            position: absolute;
-            width: 15px;
-            height: 15px;
-            background: red;
-            transform: rotate(-45deg);
-            animation: float 6s linear infinite;
-            opacity: 0.8;
-            pointer-events: none; /* Allow clicks through hearts */
-        }
-        .heart::before,
-        .heart::after {
-            content: "";
-            position: absolute;
-            width: 15px;
-            height: 15px;
-            background: red;
-            border-radius: 50%;
-        }
-        .heart::before {
-            top: -7.5px;
-        }
-        .heart::after {
-            left: 7.5px;
-        }
-        @keyframes float {
-            0% {
-                transform: translateY(0) rotate(-45deg);
-                opacity: 0.8;
-            }
-            100% {
-                transform: translateY(-100vh) rotate(-45deg);
-                opacity: 0;
-            }
-        }
-
-        /* Sparkles Animation */
-        .sparkle {
-            position: absolute;
-            width: 10px;
-            height: 10px;
-            background: gold;
-            border-radius: 50%;
-            animation: sparkle 1.5s infinite;
+        /* ====== STORY TEXT OVERLAY ====== */
+        #storyText {
+            position: fixed;
+            top: 5vh;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            color: #ffc0d9;
+            font-size: min(14px, 3vw);
+            text-align: center;
+            line-height: 2.4;
+            text-shadow: 0 0 20px rgba(255, 107, 157, 0.6), 2px 2px 0 rgba(0, 0, 0, 0.9);
             pointer-events: none;
-        }
-        @keyframes sparkle {
-            0% { opacity: 0; transform: scale(0); }
-            50% { opacity: 1; transform: scale(1); }
-            100% { opacity: 0; transform: scale(0); }
+            width: 90%;
+            max-width: 600px;
+            opacity: 0;
         }
 
-        /* Responsive Design */
-        @media (max-width: 600px) {
-            .rose {
-                width: 200px;
-                height: 300px;
-            }
-            .message {
-                font-size: 20px;
-                height: 180px;
-            }
-            .heart {
-                width: 10px;
-                height: 10px;
-            }
-            .heart::before,
-            .heart::after {
-                width: 10px;
-                height: 10px;
-            }
+        /* ====== MUSIC BUTTON ====== */
+        .music-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 50;
+            background: rgba(255, 107, 157, 0.15);
+            border: 2px solid rgba(255, 107, 157, 0.5);
+            color: #ff6b9d;
+            padding: 8px 12px;
+            font-family: 'Press Start 2P', monospace;
+            font-size: min(9px, 2vw);
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+
+        .music-btn:hover {
+            background: rgba(255, 107, 157, 0.3);
+        }
+
+        .music-btn.playing {
+            box-shadow: 0 0 15px rgba(255, 107, 157, 0.4);
+        }
+
+        .hidden-player {
+            position: fixed;
+            top: -9999px;
+            left: -9999px;
+            width: 0;
+            height: 0;
+            opacity: 0;
+            pointer-events: none;
         }
     </style>
 </head>
 <body>
-    <button id="play">Play Sound</button>
-    <audio id="audio">
-        <source src="/love.html" type="audio/mpeg">
-        <!-- <source src="/song/love.mp3" type="audio/mpeg"> -->
-        Your browser does not support the audio element.
-    </audio>
 
-    <script>
-        document.getElementById('play').addEventListener('click', () => {
-            const audio = document.getElementById('audio');
-            audio.play().catch(error => console.error('Error playing audio:', error));
-        });
-    </script>
-    <!-- Hidden YouTube Embed for Background Music -->
-    <iframe 
-        id="background-music-iframe" 
-        width="0" 
-        height="0" 
-        src="https://www.youtube.com/embed/Ptk_1Dc2iPY?autoplay=1&loop=1&playlist=Ptk_1Dc2iPY&controls=0&mute=0" 
-        frameborder="0" 
-        allow="autoplay; encrypted-media" 
-        allowfullscreen>
-    </iframe>
-
-    <div class="container">
-        <!-- Rose with Grow Animation -->
-        <div class="grow">
-            <!-- Bigger & More Realistic 2D Rose -->
-            <svg class="rose" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 300">
-
-                <!-- Stem & Leaves -->
-                <path 
-                    d="M100,300 
-                       C100,220 95,180 100,150"
-                    fill="none"
-                    stroke="#228B22"
-                    stroke-width="4"
-                    stroke-linecap="round"
-                />
-                <path 
-                    d="M95,200 Q70,190 80,160" 
-                    fill="none" 
-                    stroke="#228B22" 
-                    stroke-width="3"
-                    stroke-linecap="round"
-                />
-                <path 
-                    d="M105,180 Q130,170 120,140" 
-                    fill="none" 
-                    stroke="#228B22" 
-                    stroke-width="3"
-                    stroke-linecap="round"
-                />
-
-                <!-- Outer Petals -->
-                <path 
-                    d="M100,150
-                       C120,140 140,160 130,180
-                       C160,180 160,200 130,210
-                       C150,240 100,240  90,210
-                       C60,210  40,190  50,170
-                       C30,150  60,130  80,140
-                       C80,120  90,115  100,120
-                       Z"
-                    fill="#E91E63"
-                    stroke="#AD1457"
-                    stroke-width="3"
-                />
-
-                <!-- Inner Petals Detail -->
-                <path 
-                    d="M100,150
-                       C110,140 125,140 125,155
-                       C140,160 140,170 125,175
-                       C140,190 100,190  90,175
-                       C75,170  80,160  85,155
-                       C80,150  90,140  100,150
-                       Z"
-                    fill="#F48FB1"
-                    stroke="#AD1457"
-                    stroke-width="2"
-                />
-
-                <!-- Rose center (golden stamen) -->
-                <circle 
-                    cx="100" 
-                    cy="155" 
-                    r="4" 
-                    fill="#FFD700"
-                />
-            </svg>
+<!-- ========== INTRO SCREEN ========== -->
+<div id="intro">
+    <canvas id="introCanvas"></canvas>
+    <div class="intro-content">
+        <div class="intro-line1">I made something<br>special for you...</div>
+        <div class="intro-heart-box">
+            <canvas id="introHeart" width="130" height="120"></canvas>
         </div>
-
-        <!-- Valentine's Message -->
-        <div class="message">
-            <span class="message1">Happy Valentine's Day, Alice!</span>
-            <span class="message2">My love for you grows deeper every day. Forever yours, Elwood.</span>
-            <span class="message3">Every moment with you is a treasure. I cherish you endlessly.</span>
-        </div>
+        <div class="intro-line2">Alice, this is for you</div>
+        <div class="intro-click">~ Click anywhere to begin ~</div>
     </div>
+</div>
 
-    <!-- JavaScript for Mini Hearts and Sparkles -->
-    <script>
-        /********************************
-         * Dynamic limit of hearts based on screen size
-         ********************************/
-        let maxHearts = 0;
+<!-- ========== STORY CANVAS ========== -->
+<canvas id="storyCanvas"></canvas>
 
-        function updateMaxHearts() {
-          // 1 heart per 20,000 pixels of screen area (adjust as desired)
-          const area = window.innerWidth * window.innerHeight;
-          maxHearts = Math.floor(area / 20000);
+<!-- ========== STORY TEXT ========== -->
+<div id="storyText"></div>
 
-          // Ensure at least a few hearts
-          if (maxHearts < 5) {
-            maxHearts = 5;
-          }
+<!-- ========== MUSIC ========== -->
+<button class="music-btn" id="musicBtn">&#9835; Music</button>
+<iframe id="bgMusic" class="hidden-player" src="" frameborder="0"
+        allow="autoplay; encrypted-media" allowfullscreen></iframe>
+
+<script>
+// ================================================================
+// CONFIGURATION
+// ================================================================
+const STORY_DURATION = 32000;
+
+const SCENES = [
+    { start: 0,     end: 4000,  id: 'sky' },
+    { start: 3000,  end: 9000,  id: 'boy_enters',  text: 'There was a boy\nnamed Elwood...' },
+    { start: 8000,  end: 14000, id: 'girl_enters',  text: '...who met a wonderful\ngirl named Alice' },
+    { start: 13000, end: 19000, id: 'they_meet',    text: 'And his heart knew\nshe was the one' },
+    { start: 18000, end: 25000, id: 'celebration',  text: 'Happy Valentine\'s Day\nAlice!' },
+    { start: 24000, end: 30000, id: 'message',      text: 'Every love story is\nbeautiful, but ours\nis my favorite' },
+    { start: 29000, end: 32000, id: 'fadeout',       text: 'Forever yours,\nElwood' },
+];
+
+// Pixel heart shape for canvas rendering (11 cols x 10 rows)
+const HEART_MAP = [
+    [0,0,1,1,0,0,0,1,1,0,0],
+    [0,1,2,2,1,0,1,2,2,1,0],
+    [1,2,2,2,2,1,2,2,2,2,1],
+    [1,2,2,2,2,2,2,2,2,2,1],
+    [1,2,2,2,2,2,2,2,2,2,1],
+    [0,1,2,2,2,2,2,2,2,1,0],
+    [0,0,1,2,2,2,2,2,1,0,0],
+    [0,0,0,1,2,2,2,1,0,0,0],
+    [0,0,0,0,1,2,1,0,0,0,0],
+    [0,0,0,0,0,1,0,0,0,0,0],
+];
+
+// Mini heart for floating particles (6x5)
+const MINI_HEART = [
+    [0,1,0,0,1,0],
+    [1,1,1,1,1,1],
+    [0,1,1,1,1,0],
+    [0,0,1,1,0,0],
+    [0,0,0,0,0,0],
+];
+
+// ================================================================
+// INTRO SCREEN
+// ================================================================
+const introEl = document.getElementById('intro');
+const introCanvas = document.getElementById('introCanvas');
+const introCtx = introCanvas.getContext('2d');
+const introHeartCanvas = document.getElementById('introHeart');
+const introHeartCtx = introHeartCanvas.getContext('2d');
+
+let introStars = [];
+
+function initIntroStars() {
+    introCanvas.width = window.innerWidth;
+    introCanvas.height = window.innerHeight;
+    introStars = [];
+    const count = Math.min(300, Math.floor((introCanvas.width * introCanvas.height) / 5000));
+    for (let i = 0; i < count; i++) {
+        introStars.push({
+            x: Math.random() * introCanvas.width,
+            y: Math.random() * introCanvas.height,
+            size: Math.random() * 2 + 0.8,
+            speed: Math.random() * 0.025 + 0.008,
+            offset: Math.random() * Math.PI * 2,
+            color: Math.random() > 0.85 ? '#ffc0d9' : '#ffffff'
+        });
+    }
+}
+
+function drawIntro(time) {
+    if (introEl.classList.contains('fade-out')) return;
+
+    const iw = introCanvas.width;
+    const ih = introCanvas.height;
+
+    // Background gradient
+    const grad = introCtx.createLinearGradient(0, 0, 0, ih);
+    grad.addColorStop(0, '#050010');
+    grad.addColorStop(0.5, '#0f001f');
+    grad.addColorStop(1, '#1a0033');
+    introCtx.fillStyle = grad;
+    introCtx.fillRect(0, 0, iw, ih);
+
+    // Stars
+    introCtx.imageSmoothingEnabled = false;
+    for (const s of introStars) {
+        const a = 0.3 + 0.7 * Math.abs(Math.sin(time * s.speed + s.offset));
+        introCtx.globalAlpha = a;
+        introCtx.fillStyle = s.color;
+        const sz = Math.max(1, Math.round(s.size));
+        introCtx.fillRect(Math.round(s.x), Math.round(s.y), sz, sz);
+    }
+    introCtx.globalAlpha = 1;
+
+    // Pulsing pixel heart
+    const beat = Math.sin(time * 0.006);
+    const ps = 7.5 + beat * 1.2;
+
+    introHeartCtx.clearRect(0, 0, 130, 120);
+    introHeartCtx.imageSmoothingEnabled = false;
+    const hCols = HEART_MAP[0].length;
+    const hRows = HEART_MAP.length;
+    const hOx = 65 - (hCols * ps) / 2;
+    const hOy = 55 - (hRows * ps) / 2;
+
+    // Glow behind heart
+    introHeartCtx.globalAlpha = 0.15 + beat * 0.05;
+    introHeartCtx.fillStyle = '#ff3d7f';
+    introHeartCtx.beginPath();
+    introHeartCtx.arc(65, 55, 50 + beat * 5, 0, Math.PI * 2);
+    introHeartCtx.fill();
+    introHeartCtx.globalAlpha = 1;
+
+    const heartColors = { 1: '#cc1145', 2: '#ff3d7f' };
+    for (let r = 0; r < hRows; r++) {
+        for (let c = 0; c < hCols; c++) {
+            const v = HEART_MAP[r][c];
+            if (!v) continue;
+            introHeartCtx.fillStyle = heartColors[v];
+            introHeartCtx.fillRect(
+                Math.round(hOx + c * ps),
+                Math.round(hOy + r * ps),
+                Math.ceil(ps), Math.ceil(ps)
+            );
         }
+    }
+}
 
-        updateMaxHearts();
-        window.addEventListener('resize', updateMaxHearts);
+// ================================================================
+// STORY - STATE
+// ================================================================
+const canvas = document.getElementById('storyCanvas');
+const ctx = canvas.getContext('2d');
+const storyTextEl = document.getElementById('storyText');
 
-        // Create a mini heart
-        function createMiniHeart() {
-            const heart = document.createElement('div');
-            heart.classList.add('heart');
+let W, H;
+let storyTime = 0;
+let storyStarted = false;
+let storyStars = [];
+let fireworks = [];
+let floatHearts = [];
 
-            // Random position
-            heart.style.left = Math.random() * 100 + 'vw';
-            heart.style.bottom = Math.random() * 100 + 'vh';
+function resizeCanvas() {
+    W = canvas.width = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+    initStoryStars();
+}
 
-            // Random animation duration between 4s to 8s
-            heart.style.animationDuration = (Math.random() * 4 + 4) + 's';
+function initStoryStars() {
+    storyStars = [];
+    const count = Math.min(400, Math.floor((W * H) / 4000));
+    for (let i = 0; i < count; i++) {
+        storyStars.push({
+            x: Math.random() * W,
+            y: Math.random() * H * 0.7,
+            size: Math.random() * 2.2 + 0.6,
+            speed: Math.random() * 0.028 + 0.008,
+            offset: Math.random() * Math.PI * 2,
+            color: Math.random() > 0.82 ? '#ffc0d9' : '#ffffff'
+        });
+    }
+}
 
-            // Random animation delay
-            heart.style.animationDelay = '-' + Math.random() * 3 + 's';
+// ================================================================
+// STORY - CHARACTER DRAWING
+// ================================================================
+// Each part: [relX, relY, width, height, color]
+// Coordinates relative to character's feet (center-bottom)
 
-            // Random size (10px to 20px)
-            const size = Math.random() * 10 + 10;
-            heart.style.width = size + 'px';
-            heart.style.height = size + 'px';
+function boyParts(walkFrame) {
+    const parts = [
+        // Hair
+        [-4, -24, 8, 2, '#3a2a1a'],
+        [-5, -22, 10, 2, '#3a2a1a'],
+        // Side hair
+        [-5, -20, 1, 3, '#3a2a1a'],
+        [4, -20, 1, 3, '#3a2a1a'],
+        // Face
+        [-4, -20, 8, 5, '#fdd9b5'],
+        // Eyes
+        [-3, -18, 2, 1, '#2c3e50'],
+        [1, -18, 2, 1, '#2c3e50'],
+        // Smile
+        [-1, -16, 3, 1, '#e74c3c'],
+        // Shirt
+        [-4, -15, 8, 2, '#3498db'],
+        [-5, -13, 10, 5, '#3498db'],
+        // Arms
+        [-7, -13, 2, 4, '#fdd9b5'],
+        [5, -13, 2, 4, '#fdd9b5'],
+        // Pants
+        [-4, -8, 8, 4, '#2c3e50'],
+    ];
 
-            // Random color variation
-            const color = `rgba(255, ${Math.random() * 100}, ${Math.random() * 100}, 0.8)`;
-            heart.style.background = color;
-            heart.style.borderColor = color;
+    if (walkFrame === 1) {
+        parts.push([-5, -4, 3, 4, '#2c3e50'], [2, -4, 3, 4, '#2c3e50']);
+        parts.push([-6, 0, 4, 2, '#8b4513'], [2, 0, 4, 2, '#8b4513']);
+    } else if (walkFrame === 2) {
+        parts.push([-3, -4, 3, 4, '#2c3e50'], [0, -4, 3, 4, '#2c3e50']);
+        parts.push([-4, 0, 4, 2, '#8b4513'], [0, 0, 4, 2, '#8b4513']);
+    } else {
+        parts.push([-4, -4, 3, 4, '#2c3e50'], [1, -4, 3, 4, '#2c3e50']);
+        parts.push([-5, 0, 4, 2, '#8b4513'], [1, 0, 4, 2, '#8b4513']);
+    }
 
-            document.body.appendChild(heart);
+    return parts;
+}
 
-            // Remove after animation
-            heart.addEventListener('animationend', () => {
-                heart.remove();
-            });
-        }
+function girlParts(walkFrame) {
+    const parts = [
+        // Hair
+        [-4, -24, 8, 2, '#5a2d0c'],
+        [-5, -22, 10, 3, '#5a2d0c'],
+        [-6, -19, 2, 8, '#5a2d0c'],
+        [4, -19, 2, 8, '#5a2d0c'],
+        // Face
+        [-4, -19, 8, 5, '#fdd9b5'],
+        // Eyes
+        [-3, -17, 2, 1, '#2c3e50'],
+        [1, -17, 2, 1, '#2c3e50'],
+        // Blush
+        [-4, -16, 2, 1, '#ffb6c1'],
+        [2, -16, 2, 1, '#ffb6c1'],
+        // Smile
+        [-1, -15, 3, 1, '#e74c3c'],
+        // Dress top
+        [-4, -14, 8, 2, '#ff6b9d'],
+        [-5, -12, 10, 5, '#ff6b9d'],
+        // Arms
+        [-7, -12, 2, 4, '#fdd9b5'],
+        [5, -12, 2, 4, '#fdd9b5'],
+        // Skirt
+        [-6, -7, 12, 5, '#ff3d7f'],
+        [-5, -2, 10, 2, '#ff3d7f'],
+    ];
 
-        // Keep spawning hearts, respecting maxHearts
-        setInterval(() => {
-            const heartCount = document.querySelectorAll('.heart').length;
-            if (heartCount < maxHearts) {
-              createMiniHeart();
+    if (walkFrame === 1) {
+        parts.push([-4, 0, 2, 3, '#fdd9b5'], [2, 0, 2, 3, '#fdd9b5']);
+        parts.push([-5, 3, 3, 2, '#ff1493'], [2, 3, 3, 2, '#ff1493']);
+    } else if (walkFrame === 2) {
+        parts.push([-2, 0, 2, 3, '#fdd9b5'], [0, 0, 2, 3, '#fdd9b5']);
+        parts.push([-3, 3, 3, 2, '#ff1493'], [0, 3, 3, 2, '#ff1493']);
+    } else {
+        parts.push([-3, 0, 2, 3, '#fdd9b5'], [1, 0, 2, 3, '#fdd9b5']);
+        parts.push([-4, 3, 3, 2, '#ff1493'], [1, 3, 3, 2, '#ff1493']);
+    }
+
+    return parts;
+}
+
+function drawCharacter(type, x, y, scale, walkPhase, flipX) {
+    const walkFrame = walkPhase > 0 ? ((Math.floor(walkPhase * 6) % 2) + 1) : 0;
+    const bob = walkPhase > 0 ? Math.sin(walkPhase * Math.PI * 6) * scale * 1.5 : 0;
+
+    const parts = type === 'boy' ? boyParts(walkFrame) : girlParts(walkFrame);
+
+    ctx.save();
+    ctx.translate(x, y + bob);
+    if (flipX) ctx.scale(-1, 1);
+
+    for (const [px, py, pw, ph, color] of parts) {
+        ctx.fillStyle = color;
+        ctx.fillRect(px * scale, py * scale, pw * scale, ph * scale);
+    }
+
+    ctx.restore();
+}
+
+// ================================================================
+// STORY - ENVIRONMENT
+// ================================================================
+function drawSky(alpha) {
+    ctx.globalAlpha = alpha;
+    const grad = ctx.createLinearGradient(0, 0, 0, H * 0.75);
+    grad.addColorStop(0, '#0a0015');
+    grad.addColorStop(0.35, '#12001f');
+    grad.addColorStop(0.7, '#1a0033');
+    grad.addColorStop(1, '#250040');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, W, H);
+    ctx.globalAlpha = 1;
+}
+
+function drawStars(time, alpha) {
+    ctx.imageSmoothingEnabled = false;
+    for (const s of storyStars) {
+        const a = alpha * (0.3 + 0.7 * Math.abs(Math.sin(time * s.speed + s.offset)));
+        ctx.globalAlpha = a;
+        ctx.fillStyle = s.color;
+        const sz = Math.max(1, Math.round(s.size));
+        ctx.fillRect(Math.round(s.x), Math.round(s.y), sz, sz);
+    }
+    ctx.globalAlpha = 1;
+}
+
+function drawMoon(time) {
+    const mx = W * 0.82;
+    const my = H * 0.12;
+    const ps = Math.max(2, Math.round(Math.min(W, H) / 250));
+    const glow = 0.8 + 0.2 * Math.sin(time * 0.001);
+
+    // Soft glow
+    ctx.globalAlpha = 0.08 * glow;
+    ctx.fillStyle = '#fffde0';
+    ctx.beginPath();
+    ctx.arc(mx, my, ps * 12, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.globalAlpha = 0.15 * glow;
+    ctx.beginPath();
+    ctx.arc(mx, my, ps * 7, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Pixel crescent
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = '#fffde0';
+    const r = 5;
+    for (let dy = -r; dy <= r; dy++) {
+        for (let dx = -r; dx <= r; dx++) {
+            const outer = dx * dx + dy * dy;
+            const inner = (dx - 2) * (dx - 2) + (dy) * (dy);
+            if (outer <= r * r && inner > (r - 1.5) * (r - 1.5)) {
+                ctx.fillRect(
+                    Math.round(mx + dx * ps),
+                    Math.round(my + dy * ps),
+                    ps, ps
+                );
             }
-        }, 1500);
+        }
+    }
+}
 
-        /********************************
-         * Sparkles
-         ********************************/
-        function createSparkle() {
-            const sparkle = document.createElement('div');
-            sparkle.classList.add('sparkle');
+function drawGround(groundY) {
+    // Dark grass
+    ctx.fillStyle = '#0f250f';
+    ctx.fillRect(0, groundY, W, H - groundY);
 
-            // Random screen position
-            sparkle.style.left = Math.random() * 100 + 'vw';
-            sparkle.style.top = Math.random() * 100 + 'vh';
+    // Top highlight
+    ctx.fillStyle = '#1a3a1a';
+    ctx.fillRect(0, groundY, W, 4);
 
-            document.body.appendChild(sparkle);
+    // Grass tufts
+    ctx.fillStyle = '#2a5a2a';
+    const ps = Math.max(2, Math.round(Math.min(W, H) / 300));
+    for (let x = 0; x < W; x += ps * 5) {
+        const h = (Math.sin(x * 0.15) + 1) * ps * 2 + ps;
+        ctx.fillRect(x, groundY - h, ps, h);
+    }
+}
 
-            // Remove after animation
-            sparkle.addEventListener('animationend', () => {
-                sparkle.remove();
-            });
+function drawFlower(x, y, size, color) {
+    // Stem
+    ctx.fillStyle = '#2a5a2a';
+    ctx.fillRect(x, y + size, size, size * 3);
+
+    // Petals
+    ctx.fillStyle = color;
+    ctx.fillRect(x - size, y, size, size);
+    ctx.fillRect(x + size, y, size, size);
+    ctx.fillRect(x, y - size, size, size);
+    ctx.fillRect(x, y + size, size, size);
+
+    // Center
+    ctx.fillStyle = '#ffd700';
+    ctx.fillRect(x, y, size, size);
+}
+
+// ================================================================
+// STORY - PARTICLES
+// ================================================================
+function spawnFirework(x, y) {
+    const colors = ['#ff1a5e', '#ff6b9d', '#ffd700', '#ff3d7f', '#ff9dc5', '#fff'];
+    for (let i = 0; i < 24; i++) {
+        const angle = (Math.PI * 2 / 24) * i + Math.random() * 0.2;
+        const speed = 1.5 + Math.random() * 2.5;
+        fireworks.push({
+            x, y,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed,
+            life: 1,
+            decay: 0.012 + Math.random() * 0.012,
+            size: 2 + Math.random() * 2,
+            color: colors[Math.floor(Math.random() * colors.length)]
+        });
+    }
+}
+
+function spawnFloatHeart(x, y) {
+    const colors = ['#ff1a5e', '#ff3d7f', '#ff6b9d', '#ff9dc5'];
+    floatHearts.push({
+        x, y,
+        vy: -0.6 - Math.random() * 1.2,
+        vx: (Math.random() - 0.5) * 0.6,
+        life: 1,
+        decay: 0.004 + Math.random() * 0.004,
+        size: 1.5 + Math.random() * 2.5,
+        color: colors[Math.floor(Math.random() * colors.length)]
+    });
+}
+
+function drawAndUpdateFireworks() {
+    ctx.imageSmoothingEnabled = false;
+    for (let i = fireworks.length - 1; i >= 0; i--) {
+        const f = fireworks[i];
+        f.x += f.vx;
+        f.y += f.vy;
+        f.vy += 0.04;
+        f.life -= f.decay;
+
+        if (f.life <= 0) { fireworks.splice(i, 1); continue; }
+
+        ctx.globalAlpha = f.life;
+        ctx.fillStyle = f.color;
+        const s = Math.max(1, Math.round(f.size));
+        ctx.fillRect(Math.round(f.x), Math.round(f.y), s, s);
+    }
+    ctx.globalAlpha = 1;
+}
+
+function drawAndUpdateFloatHearts() {
+    ctx.imageSmoothingEnabled = false;
+    for (let i = floatHearts.length - 1; i >= 0; i--) {
+        const h = floatHearts[i];
+        h.x += h.vx;
+        h.y += h.vy;
+        h.life -= h.decay;
+
+        if (h.life <= 0) { floatHearts.splice(i, 1); continue; }
+
+        ctx.globalAlpha = h.life;
+        ctx.fillStyle = h.color;
+
+        for (let r = 0; r < MINI_HEART.length; r++) {
+            for (let c = 0; c < MINI_HEART[r].length; c++) {
+                if (MINI_HEART[r][c]) {
+                    ctx.fillRect(
+                        Math.round(h.x + c * h.size),
+                        Math.round(h.y + r * h.size),
+                        Math.ceil(h.size), Math.ceil(h.size)
+                    );
+                }
+            }
+        }
+    }
+    ctx.globalAlpha = 1;
+}
+
+// ================================================================
+// STORY - HELPERS
+// ================================================================
+function easeInOut(t) {
+    t = Math.max(0, Math.min(1, t));
+    return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+}
+
+function lerp(a, b, t) {
+    return a + (b - a) * Math.max(0, Math.min(1, t));
+}
+
+function progress(start, end, current) {
+    if (current < start) return 0;
+    if (current >= end) return 1;
+    return (current - start) / (end - start);
+}
+
+// ================================================================
+// STORY - MAIN DRAW
+// ================================================================
+function drawStoryFrame(time) {
+    const t = storyTime % STORY_DURATION;
+
+    // Reset particles when story loops
+    if (storyTime > 0 && t < 100) {
+        fireworks = [];
+        floatHearts = [];
+    }
+
+    const groundY = H * 0.78;
+    const charScale = Math.max(2.5, Math.min(5.5, Math.min(W, H) / 180));
+    const centerX = W / 2;
+    const charY = groundY;
+
+    // Character spacing from center
+    const charSpread = 50 * charScale / 4;
+    const charMeetSpread = 12 * charScale / 4;
+
+    ctx.clearRect(0, 0, W, H);
+
+    // ---- SKY ----
+    const skyAlpha = Math.min(1, t / 3000);
+    drawSky(skyAlpha);
+    drawStars(time, skyAlpha);
+
+    // ---- MOON ----
+    if (skyAlpha > 0.3) {
+        ctx.globalAlpha = Math.min(1, (skyAlpha - 0.3) / 0.7);
+        drawMoon(time);
+        ctx.globalAlpha = 1;
+    }
+
+    // ---- GROUND ----
+    ctx.globalAlpha = skyAlpha;
+    drawGround(groundY);
+    ctx.globalAlpha = 1;
+
+    // ---- FLOWERS (bloom during celebration, 18-25s) ----
+    const flowerP = progress(17000, 21000, t);
+    if (flowerP > 0) {
+        const fColors = ['#ff6b9d', '#ff3d7f', '#ffd700', '#ff9dc5', '#ff6b9d', '#ffd700'];
+        const fPos = [0.08, 0.18, 0.32, 0.68, 0.82, 0.92];
+        const fSize = Math.max(2, Math.round(charScale * 0.8));
+        for (let i = 0; i < fPos.length; i++) {
+            const fp = Math.min(1, flowerP * 4 - i * 0.4);
+            if (fp > 0) {
+                ctx.globalAlpha = Math.min(1, fp);
+                const fy = groundY - fp * fSize * 6;
+                drawFlower(W * fPos[i], fy, fSize, fColors[i]);
+            }
+        }
+        ctx.globalAlpha = 1;
+    }
+
+    // ---- CHARACTER POSITIONS ----
+
+    // Boy: enters 3-7s, walks to meet 13-16s
+    const boyEnterP = progress(3000, 7000, t);
+    const meetP = progress(13000, 16000, t);
+
+    const boyStartX = -40;
+    const boyStopX = centerX - charSpread;
+    const boyMeetX = centerX - charMeetSpread;
+
+    let boyX = -999, boyWalk = 0, boyFlip = false;
+    let boyAlpha = 1;
+
+    if (t < 3000) {
+        boyX = -999;
+    } else if (t < 7000) {
+        boyX = lerp(boyStartX, boyStopX, easeInOut(boyEnterP));
+        boyWalk = boyEnterP;
+    } else if (t < 13000) {
+        boyX = boyStopX;
+    } else if (t < 16000) {
+        boyX = lerp(boyStopX, boyMeetX, easeInOut(meetP));
+        boyWalk = meetP;
+    } else if (t < 29000) {
+        boyX = boyMeetX;
+    } else {
+        boyX = boyMeetX;
+        boyAlpha = 1 - progress(29000, 31500, t);
+    }
+
+    if (boyX > -100) {
+        ctx.globalAlpha = boyAlpha;
+        drawCharacter('boy', boyX, charY, charScale, boyWalk, boyFlip);
+        ctx.globalAlpha = 1;
+    }
+
+    // Girl: enters 8-12s, walks to meet 13-16s
+    const girlEnterP = progress(8000, 12000, t);
+
+    const girlStartX = W + 40;
+    const girlStopX = centerX + charSpread;
+    const girlMeetX = centerX + charMeetSpread;
+
+    let girlX = 9999, girlWalk = 0, girlFlip = true;
+    let girlAlpha = 1;
+
+    if (t < 8000) {
+        girlX = 9999;
+    } else if (t < 12000) {
+        girlX = lerp(girlStartX, girlStopX, easeInOut(girlEnterP));
+        girlWalk = girlEnterP;
+    } else if (t < 13000) {
+        girlX = girlStopX;
+    } else if (t < 16000) {
+        girlX = lerp(girlStopX, girlMeetX, easeInOut(meetP));
+        girlWalk = meetP;
+    } else if (t < 29000) {
+        girlX = girlMeetX;
+    } else {
+        girlX = girlMeetX;
+        girlAlpha = 1 - progress(29000, 31500, t);
+    }
+
+    if (girlX < W + 100) {
+        ctx.globalAlpha = girlAlpha;
+        drawCharacter('girl', girlX, charY, charScale, girlWalk, girlFlip);
+        ctx.globalAlpha = 1;
+    }
+
+    // ---- BIG HEART (appears 15-17s, stays until fade) ----
+    const heartGrowP = progress(15000, 17500, t);
+    const heartFadeP = t > 29000 ? 1 - progress(29000, 31500, t) : 1;
+
+    if (heartGrowP > 0 && t < 32000) {
+        const heartPS = easeInOut(heartGrowP) * charScale * 0.6;
+        const heartBeat = 1 + Math.sin(time * 0.006) * 0.1;
+        const heartY = groundY - 35 * charScale;
+        const heartX = centerX;
+
+        ctx.save();
+        ctx.translate(heartX, heartY);
+        ctx.scale(heartBeat, heartBeat);
+        ctx.globalAlpha = heartFadeP * easeInOut(heartGrowP);
+
+        // Glow
+        ctx.fillStyle = '#ff3d7f';
+        ctx.globalAlpha *= 0.15;
+        ctx.beginPath();
+        ctx.arc(0, 0, heartPS * 9, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.globalAlpha = heartFadeP * easeInOut(heartGrowP);
+        const hColors = { 1: '#cc1145', 2: '#ff3d7f' };
+        const hCols = HEART_MAP[0].length;
+        const hRows = HEART_MAP.length;
+
+        for (let r = 0; r < hRows; r++) {
+            for (let c = 0; c < hCols; c++) {
+                const v = HEART_MAP[r][c];
+                if (!v) continue;
+                ctx.fillStyle = hColors[v];
+                ctx.fillRect(
+                    Math.round((c - hCols / 2) * heartPS),
+                    Math.round((r - hRows / 2) * heartPS),
+                    Math.ceil(heartPS), Math.ceil(heartPS)
+                );
+            }
         }
 
-        // Sparkles every second
-        setInterval(createSparkle, 1000);
-    </script>
+        ctx.restore();
+        ctx.globalAlpha = 1;
+    }
+
+    // ---- FIREWORKS & FLOATING HEARTS (celebration 18-25s) ----
+    const celebP = progress(18000, 25000, t);
+    if (celebP > 0 && celebP < 1) {
+        if (Math.random() < 0.04) {
+            spawnFirework(
+                W * 0.15 + Math.random() * W * 0.7,
+                H * 0.08 + Math.random() * H * 0.25
+            );
+        }
+        if (Math.random() < 0.06) {
+            spawnFloatHeart(
+                centerX - W * 0.15 + Math.random() * W * 0.3,
+                groundY - 10
+            );
+        }
+    }
+
+    drawAndUpdateFireworks();
+    drawAndUpdateFloatHearts();
+
+    // ---- FADE TO BLACK (end of loop) ----
+    if (t > 29500) {
+        const fadeP = progress(29500, 32000, t);
+        ctx.fillStyle = `rgba(10, 0, 21, ${fadeP})`;
+        ctx.fillRect(0, 0, W, H);
+    }
+
+    // ---- STORY TEXT ----
+    let activeText = '';
+    let textOpacity = 0;
+
+    for (const scene of SCENES) {
+        if (!scene.text) continue;
+        if (t >= scene.start && t <= scene.end) {
+            const fi = Math.min(1, (t - scene.start) / 1500);
+            const fo = Math.min(1, (scene.end - t) / 1500);
+            const op = Math.min(fi, fo);
+            if (op > textOpacity) {
+                activeText = scene.text;
+                textOpacity = op;
+            }
+        }
+    }
+
+    storyTextEl.style.opacity = textOpacity;
+    if (activeText) {
+        storyTextEl.innerHTML = activeText.replace(/\n/g, '<br>');
+    }
+}
+
+// ================================================================
+// MUSIC
+// ================================================================
+let musicPlaying = false;
+const musicBtn = document.getElementById('musicBtn');
+const bgMusic = document.getElementById('bgMusic');
+
+function startMusic() {
+    if (!musicPlaying) {
+        bgMusic.src = 'https://www.youtube.com/embed/Ptk_1Dc2iPY?autoplay=1&loop=1&playlist=Ptk_1Dc2iPY&controls=0&mute=0';
+        musicBtn.classList.add('playing');
+        musicBtn.innerHTML = '&#9835; Playing';
+        musicPlaying = true;
+    }
+}
+
+function stopMusic() {
+    bgMusic.src = '';
+    musicBtn.classList.remove('playing');
+    musicBtn.innerHTML = '&#9835; Music';
+    musicPlaying = false;
+}
+
+musicBtn.addEventListener('click', () => {
+    if (musicPlaying) {
+        stopMusic();
+    } else {
+        startMusic();
+    }
+});
+
+// ================================================================
+// INTRO CLICK - START EVERYTHING
+// ================================================================
+let gameStarted = false;
+
+introEl.addEventListener('click', () => {
+    if (gameStarted) return;
+    gameStarted = true;
+
+    // Start music (user gesture enables autoplay)
+    startMusic();
+
+    // Fade out intro
+    introEl.classList.add('fade-out');
+
+    // Start story after fade completes
+    setTimeout(() => {
+        storyStarted = true;
+        introEl.style.display = 'none';
+    }, 2000);
+});
+
+// ================================================================
+// MAIN ANIMATION LOOP
+// ================================================================
+let lastTime = 0;
+
+function animate(time) {
+    // Intro screen
+    if (!storyStarted) {
+        drawIntro(time);
+    }
+
+    // Story
+    if (storyStarted) {
+        const dt = lastTime > 0 ? time - lastTime : 16;
+        storyTime += dt;
+
+        drawStoryFrame(time);
+    }
+
+    lastTime = time;
+    requestAnimationFrame(animate);
+}
+
+// ================================================================
+// INIT
+// ================================================================
+window.addEventListener('resize', () => {
+    initIntroStars();
+    resizeCanvas();
+});
+
+initIntroStars();
+resizeCanvas();
+requestAnimationFrame(animate);
+</script>
 </body>
 </html>
