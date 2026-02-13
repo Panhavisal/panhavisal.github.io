@@ -180,14 +180,15 @@
             box-shadow: 0 0 15px rgba(255, 107, 157, 0.4);
         }
 
-        .hidden-player {
+        #ytPlayer {
             position: fixed;
-            top: -9999px;
-            left: -9999px;
-            width: 0;
-            height: 0;
-            opacity: 0;
+            bottom: 0;
+            right: 0;
+            width: 2px;
+            height: 2px;
+            opacity: 0.01;
             pointer-events: none;
+            z-index: -1;
         }
     </style>
 </head>
@@ -221,8 +222,7 @@
 
 <!-- ========== MUSIC ========== -->
 <button class="music-btn" id="musicBtn">&#9835; Music</button>
-<iframe id="bgMusic" class="hidden-player" src="" frameborder="0"
-        allow="autoplay; encrypted-media" allowfullscreen></iframe>
+<div id="ytPlayer"></div>
 
 <script>
 // ================================================================
@@ -1681,29 +1681,98 @@ function drawStoryFrame(time) {
 }
 
 // ================================================================
-// MUSIC
+// MUSIC - YouTube IFrame Player API (works on iOS Safari)
 // ================================================================
 let musicPlaying = false;
+let ytPlayer = null;
+let ytReady = false;
 const musicBtn = document.getElementById('musicBtn');
-const bgMusic = document.getElementById('bgMusic');
+
+// Load YouTube IFrame API
+const ytScript = document.createElement('script');
+ytScript.src = 'https://www.youtube.com/iframe_api';
+document.head.appendChild(ytScript);
+
+// Called automatically by the YouTube API when ready
+window.onYouTubeIframeAPIReady = function() {
+    ytReady = true;
+};
+
+function createPlayer() {
+    if (ytPlayer) return;
+    ytPlayer = new YT.Player('ytPlayer', {
+        height: '2',
+        width: '2',
+        videoId: '8XQyQgnVNnY',
+        playerVars: {
+            autoplay: 1,
+            controls: 0,
+            disablekb: 1,
+            fs: 0,
+            iv_load_policy: 3,
+            modestbranding: 1,
+            playsinline: 1,
+            rel: 0,
+            loop: 1,
+            playlist: '8XQyQgnVNnY'
+        },
+        events: {
+            onReady: function(e) {
+                e.target.playVideo();
+                musicPlaying = true;
+                musicBtn.classList.add('playing');
+                musicBtn.innerHTML = '&#9835; Playing';
+            },
+            onStateChange: function(e) {
+                // YT.PlayerState.ENDED === 0
+                if (e.data === 0) {
+                    // Restart for reliable infinite loop
+                    e.target.seekTo(0);
+                    e.target.playVideo();
+                }
+            },
+            onError: function() {
+                // Silently handle errors
+                musicBtn.innerHTML = '&#9835; Music';
+                musicBtn.classList.remove('playing');
+                musicPlaying = false;
+            }
+        }
+    });
+}
 
 function startMusic() {
-    if (!musicPlaying) {
-        bgMusic.src = 'https://www.youtube.com/embed/8XQyQgnVNnY?autoplay=1&loop=1&playlist=8XQyQgnVNnY&controls=0&mute=0';
+    if (musicPlaying) return;
+    if (!ytPlayer) {
+        if (ytReady) {
+            createPlayer();
+        } else {
+            // API not loaded yet, wait and retry
+            const waitForAPI = setInterval(function() {
+                if (ytReady) {
+                    clearInterval(waitForAPI);
+                    createPlayer();
+                }
+            }, 100);
+        }
+    } else {
+        ytPlayer.playVideo();
+        musicPlaying = true;
         musicBtn.classList.add('playing');
         musicBtn.innerHTML = '&#9835; Playing';
-        musicPlaying = true;
     }
 }
 
 function stopMusic() {
-    bgMusic.src = '';
+    if (ytPlayer && musicPlaying) {
+        ytPlayer.pauseVideo();
+    }
     musicBtn.classList.remove('playing');
     musicBtn.innerHTML = '&#9835; Music';
     musicPlaying = false;
 }
 
-musicBtn.addEventListener('click', () => {
+musicBtn.addEventListener('click', function() {
     if (musicPlaying) stopMusic();
     else startMusic();
 });
