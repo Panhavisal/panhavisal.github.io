@@ -1530,9 +1530,89 @@ function drawHeartScene(time, sceneT, alpha) {
 }
 
 // ================================================================
+// FIREWORK SOUND (Web Audio API - synthesized)
+// ================================================================
+let audioCtx = null;
+
+function initAudioCtx() {
+    if (audioCtx) return;
+    try {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    } catch (e) { /* silent */ }
+}
+
+function playFireworkSound() {
+    if (!audioCtx || !musicPlaying) return;
+    if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+    }
+    try {
+        const now = audioCtx.currentTime;
+        const vol = 0.12 + Math.random() * 0.06;
+
+        // Boom: short white noise burst
+        const boomLen = 0.08 + Math.random() * 0.06;
+        const boomBuf = audioCtx.createBuffer(1, audioCtx.sampleRate * boomLen, audioCtx.sampleRate);
+        const boomData = boomBuf.getChannelData(0);
+        for (let i = 0; i < boomData.length; i++) {
+            const env = 1 - i / boomData.length;
+            boomData[i] = (Math.random() * 2 - 1) * env * env;
+        }
+        const boomSrc = audioCtx.createBufferSource();
+        boomSrc.buffer = boomBuf;
+
+        // Bandpass filter for punchy mid-frequency
+        const boomFilter = audioCtx.createBiquadFilter();
+        boomFilter.type = 'bandpass';
+        boomFilter.frequency.value = 400 + Math.random() * 300;
+        boomFilter.Q.value = 0.8;
+
+        const boomGain = audioCtx.createGain();
+        boomGain.gain.setValueAtTime(vol, now);
+        boomGain.gain.exponentialRampToValueAtTime(0.001, now + boomLen);
+
+        boomSrc.connect(boomFilter);
+        boomFilter.connect(boomGain);
+        boomGain.connect(audioCtx.destination);
+        boomSrc.start(now);
+        boomSrc.stop(now + boomLen);
+
+        // Crackle: tiny rapid pops trailing after boom
+        const crackleCount = 3 + Math.floor(Math.random() * 4);
+        for (let c = 0; c < crackleCount; c++) {
+            const delay = 0.05 + Math.random() * 0.25;
+            const cLen = 0.02 + Math.random() * 0.03;
+            const cBuf = audioCtx.createBuffer(1, audioCtx.sampleRate * cLen, audioCtx.sampleRate);
+            const cData = cBuf.getChannelData(0);
+            for (let i = 0; i < cData.length; i++) {
+                const env = 1 - i / cData.length;
+                cData[i] = (Math.random() * 2 - 1) * env;
+            }
+            const cSrc = audioCtx.createBufferSource();
+            cSrc.buffer = cBuf;
+
+            const cFilter = audioCtx.createBiquadFilter();
+            cFilter.type = 'highpass';
+            cFilter.frequency.value = 2000 + Math.random() * 3000;
+
+            const cGain = audioCtx.createGain();
+            cGain.gain.setValueAtTime(vol * 0.3, now + delay);
+            cGain.gain.exponentialRampToValueAtTime(0.001, now + delay + cLen);
+
+            cSrc.connect(cFilter);
+            cFilter.connect(cGain);
+            cGain.connect(audioCtx.destination);
+            cSrc.start(now + delay);
+            cSrc.stop(now + delay + cLen);
+        }
+    } catch (e) { /* silent */ }
+}
+
+// ================================================================
 // PARTICLES
 // ================================================================
 function spawnFirework(x, y) {
+    playFireworkSound();
     const colors = ['#ff1a5e', '#ff6b9d', '#ffd700', '#ff3d7f', '#ff9dc5', '#fff'];
     for (let i = 0; i < 24; i++) {
         const angle = (Math.PI * 2 / 24) * i + Math.random() * 0.2;
@@ -1695,6 +1775,7 @@ function drawStoryFrame(time) {
 let musicPlaying = false;
 let ytPlayer = null;
 let ytReady = false;
+let ytPendingStart = false;
 const musicBtn = document.getElementById('musicBtn');
 
 // Load YouTube IFrame API
@@ -1703,12 +1784,23 @@ ytScript.src = 'https://www.youtube.com/iframe_api';
 document.head.appendChild(ytScript);
 
 // Called automatically by the YouTube API when ready
+// Handle race condition: API may load before or after this assignment
 window.onYouTubeIframeAPIReady = function() {
     ytReady = true;
+    // If user already clicked but API wasn't ready yet, create now
+    if (ytPendingStart) {
+        ytPendingStart = false;
+        createPlayer();
+    }
 };
+// Also check if API already loaded (cached script / fast load)
+if (typeof YT !== 'undefined' && YT.Player) {
+    ytReady = true;
+}
 
 function createPlayer() {
     if (ytPlayer) return;
+    if (!ytReady) { ytPendingStart = true; return; }
     ytPlayer = new YT.Player('ytPlayer', {
         height: '2',
         width: '2',
@@ -1731,6 +1823,15 @@ function createPlayer() {
                 musicPlaying = true;
                 musicBtn.classList.add('playing');
                 musicBtn.innerHTML = '&#9835; Playing';
+                // Safari workaround: retry playVideo after a short delay
+                // in case the first call was silently ignored
+                setTimeout(function() {
+                    try {
+                        if (e.target.getPlayerState && e.target.getPlayerState() !== 1) {
+                            e.target.playVideo();
+                        }
+                    } catch (err) { /* silent */ }
+                }, 800);
             },
             onStateChange: function(e) {
                 // YT.PlayerState.ENDED === 0
@@ -1739,9 +1840,14 @@ function createPlayer() {
                     e.target.seekTo(0);
                     e.target.playVideo();
                 }
+                // Update UI if paused externally
+                if (e.data === 1) {
+                    musicPlaying = true;
+                    musicBtn.classList.add('playing');
+                    musicBtn.innerHTML = '&#9835; Playing';
+                }
             },
             onError: function() {
-                // Silently handle errors
                 musicBtn.innerHTML = '&#9835; Music';
                 musicBtn.classList.remove('playing');
                 musicPlaying = false;
@@ -1753,19 +1859,11 @@ function createPlayer() {
 function startMusic() {
     if (musicPlaying) return;
     if (!ytPlayer) {
-        if (ytReady) {
-            createPlayer();
-        } else {
-            // API not loaded yet, wait and retry
-            const waitForAPI = setInterval(function() {
-                if (ytReady) {
-                    clearInterval(waitForAPI);
-                    createPlayer();
-                }
-            }, 100);
-        }
+        createPlayer();
     } else {
-        ytPlayer.playVideo();
+        try {
+            ytPlayer.playVideo();
+        } catch (e) { /* silent */ }
         musicPlaying = true;
         musicBtn.classList.add('playing');
         musicBtn.innerHTML = '&#9835; Playing';
@@ -1773,8 +1871,8 @@ function startMusic() {
 }
 
 function stopMusic() {
-    if (ytPlayer && musicPlaying) {
-        ytPlayer.pauseVideo();
+    if (ytPlayer) {
+        try { ytPlayer.pauseVideo(); } catch (e) { /* silent */ }
     }
     musicBtn.classList.remove('playing');
     musicBtn.innerHTML = '&#9835; Music';
@@ -1794,6 +1892,7 @@ let gameStarted = false;
 introEl.addEventListener('click', () => {
     if (gameStarted) return;
     gameStarted = true;
+    initAudioCtx();
     startMusic();
     introEl.classList.add('fade-out');
     setTimeout(() => {
